@@ -1,0 +1,26 @@
+{
+  "name": "bulls-and-cows",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A four-digit code-breaking game: ten guesses, a clock, and no help.",
+  "license": "MIT",
+  "author": "Ajith Davis",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node tools/serve.mjs",
+    "dev": "node tools/serve.mjs",
+    "test": "node --test \"test/*.test.js\"",
+    "build": "node tools/build.mjs",
+    "check": "npm test && npm run build"
+  },
+  "keywords": [
+    "bulls-and-cows",
+    "mastermind",
+    "game",
+    "puzzle",
+    "vanilla-js"
+  ]
+}

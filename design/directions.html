@@ -1,0 +1,2621 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nocturne — Art Direction Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Oswald:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   NOCTURNE — five art directions over one live game
+   Switch skins mid-match; the board state is shared, so you are
+   comparing the same information in five visual languages.
+   ═══════════════════════════════════════════════════════════════ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background: #070708;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+/* ── Stage shell ───────────────────────────────────────────────── */
+
+.stage {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  gap: 0;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ornament {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.masthead, .ledger, .readout, .console, .statusbar { position: relative; z-index: 1; }
+
+.masthead { grid-area: m; }
+.ledger   { grid-area: l; }
+.readout  { grid-area: r; }
+.console  { grid-area: c; }
+.statusbar{ grid-area: s; }
+
+.mark { line-height: 1; }
+.tagline { line-height: 1.4; }
+
+/* Shared structural primitives — every skin restyles these */
+
+.rows { display: flex; flex-direction: column; }
+.row { display: grid; align-items: center; }
+.row-who { white-space: nowrap; }
+.row-digits { display: flex; }
+.row-digits span { display: block; text-align: center; }
+.row-marks { display: flex; align-items: center; }
+.row-text { white-space: nowrap; }
+.row-count { white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.entry { display: flex; }
+.cell { display: grid; place-items: center; }
+
+.pad { display: grid; }
+.key { display: grid; place-items: center; user-select: none; }
+
+.acts { display: flex; }
+.act { white-space: nowrap; }
+
+.tracker { display: flex; }
+.tracker b { display: grid; place-items: center; font-weight: inherit; }
+
+.gauge { position: relative; overflow: hidden; }
+.gauge-fill { position: absolute; }
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 24px 24px 96px;
+  overflow-y: auto;
+}
+.overlay[hidden] { display: none; }
+
+/* ── Neutral director's bar (deliberately outside every skin) ─── */
+
+.switcher {
+  position: fixed;
+  z-index: 80;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 5px;
+  border-radius: 999px;
+  background: rgba(14,14,16,.82);
+  border: 1px solid rgba(255,255,255,.14);
+  box-shadow: 0 18px 50px -12px rgba(0,0,0,.8);
+  backdrop-filter: blur(16px) saturate(140%);
+  font-family: 'Inter Tight', system-ui, sans-serif;
+  max-width: calc(100vw - 24px);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.switcher::-webkit-scrollbar { display: none; }
+.switcher button {
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .02em;
+  color: rgba(255,255,255,.52);
+  white-space: nowrap;
+  transition: color .16s, background .16s;
+}
+.switcher button:hover { color: rgba(255,255,255,.9); }
+.switcher button[aria-pressed="true"] {
+  background: #f2f2f0;
+  color: #0b0b0c;
+}
+.switcher .sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 3px 6px;
+  background: rgba(255,255,255,.14);
+  flex: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+
+/* ╔═══════════════════════════════════════════════════════════════╗
+   ║  I. OBSIDIAN — a measuring instrument, not a game             ║
+   ║  near-black · milled aluminium · amber phosphor               ║
+   ╚═══════════════════════════════════════════════════════════════╝ */
+
+[data-dir="obsidian"] {
+  --ink: #070708;
+  --panel: #101013;
+  --panel-hi: #17171b;
+  --bezel: #26262b;
+  --bezel-hi: #3a3a42;
+  --amber: #ffa23a;
+  --amber-dim: #7d5120;
+  --text: #a8a8af;
+  --text-hi: #e6e6ea;
+  --alarm: #e2492f;
+}
+
+[data-dir="obsidian"] .stage {
+  background: var(--ink);
+  color: var(--text);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  grid-template-columns: minmax(0,1fr) 300px;
+  grid-template-rows: auto minmax(0,1fr) auto auto;
+  grid-template-areas:
+    "m m"
+    "l r"
+    "c r"
+    "s s";
+  padding: 28px;
+  gap: 18px;
+}
+
+[data-dir="obsidian"] .ornament {
+  background:
+    radial-gradient(1100px 620px at 76% -10%, rgba(255,162,58,.07), transparent 62%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.016) 0 1px, transparent 1px 3px);
+}
+
+/* masthead */
+[data-dir="obsidian"] .masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--bezel);
+  flex-wrap: wrap;
+}
+[data-dir="obsidian"] .mark {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: .42em;
+  text-transform: uppercase;
+  color: var(--text-hi);
+}
+[data-dir="obsidian"] .tagline {
+  font-family: 'Archivo', sans-serif;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: #55555d;
+}
+[data-dir="obsidian"] .meta { display: flex; gap: 26px; align-items: baseline; }
+[data-dir="obsidian"] .meta div { text-align: right; }
+[data-dir="obsidian"] .meta i {
+  display: block;
+  font-style: normal;
+  font-family: 'Archivo', sans-serif;
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #4e4e56;
+  margin-bottom: 3px;
+}
+[data-dir="obsidian"] .meta b {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--amber);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ledger as a strip-chart recorder */
+[data-dir="obsidian"] .ledger {
+  background: var(--panel);
+  border: 1px solid var(--bezel);
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 var(--bezel-hi), 0 20px 48px -22px #000;
+  padding: 16px 18px;
+  overflow-y: auto;
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+}
+[data-dir="obsidian"] .ledger-label {
+  font-family: 'Archivo', sans-serif;
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: #4e4e56;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #24242a;
+  margin-bottom: 4px;
+}
+[data-dir="obsidian"] .rows { gap: 0; margin-top: auto; }
+[data-dir="obsidian"] .row {
+  grid-template-columns: 112px auto auto minmax(0,1fr);
+  gap: 20px;
+  padding: 11px 0;
+  border-bottom: 1px solid #1a1a1f;
+  animation: obs-in .28s cubic-bezier(.2,.8,.3,1) both;
+}
+@keyframes obs-in { from { opacity: 0; transform: translateY(-5px); } }
+[data-dir="obsidian"] .row-who {
+  font-family: 'Archivo', sans-serif;
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: #50505a;
+}
+[data-dir="obsidian"] .row[data-by="you"] .row-who { color: var(--amber-dim); }
+[data-dir="obsidian"] .row-digits { gap: 5px; }
+[data-dir="obsidian"] .row-digits span {
+  width: 30px;
+  padding: 5px 0;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--text-hi);
+  background: #0a0a0c;
+  border: 1px solid #202026;
+  border-radius: 2px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.7);
+  font-variant-numeric: tabular-nums;
+}
+[data-dir="obsidian"] .row[data-kind="commit"] .row-digits span {
+  border-color: var(--amber-dim);
+  color: var(--amber);
+}
+[data-dir="obsidian"] .row-redact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Archivo', sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: #4a4a53;
+}
+[data-dir="obsidian"] .row-redact::before {
+  content: "";
+  width: 136px;
+  height: 28px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(135deg, #16161a 0 6px, #101013 6px 12px);
+  border: 1px solid #22222a;
+}
+[data-dir="obsidian"] .row-count { display: none; }
+[data-dir="obsidian"] .row-text {
+  justify-self: start;
+  font-size: 10.5px;
+  letter-spacing: .07em;
+  color: #5c5c66;
+}
+[data-dir="obsidian"] .row[data-kind="commit"] .row-text { color: var(--amber-dim); }
+[data-dir="obsidian"] .row-marks { gap: 5px; }
+[data-dir="obsidian"] .mk {
+  width: 11px; height: 22px;
+  border-radius: 1px;
+  background: #1c1c21;
+}
+[data-dir="obsidian"] .mk[data-m="bull"] {
+  background: var(--amber);
+  box-shadow: 0 0 12px rgba(255,162,58,.55);
+}
+[data-dir="obsidian"] .mk[data-m="cow"] {
+  background: linear-gradient(to top, var(--amber-dim) 46%, #1c1c21 46%);
+}
+[data-dir="obsidian"] .mk[data-m="miss"] { height: 4px; align-self: center; background: #212128; }
+
+/* readout rail */
+[data-dir="obsidian"] .readout {
+  background: var(--panel);
+  border: 1px solid var(--bezel);
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 var(--bezel-hi), 0 20px 48px -22px #000;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  position: relative;
+}
+[data-dir="obsidian"] .readout::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  height: 76px;
+  background: linear-gradient(to bottom, transparent, rgba(255,162,58,.045), transparent);
+  animation: obs-sweep 7s linear infinite;
+  pointer-events: none;
+}
+@keyframes obs-sweep { from { top: -80px; } to { top: 100%; } }
+[data-dir="obsidian"] .ro-label {
+  font-family: 'Archivo', sans-serif;
+  font-size: 8.5px;
+  font-weight: 600;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: #4e4e56;
+  margin-bottom: 12px;
+}
+[data-dir="obsidian"] .ro-big {
+  font-size: 46px;
+  font-weight: 300;
+  line-height: .9;
+  color: var(--amber);
+  text-shadow: 0 0 26px rgba(255,162,58,.4);
+  font-variant-numeric: tabular-nums;
+}
+[data-dir="obsidian"] .ro-sub { font-size: 10px; color: #55555d; margin-top: 7px; letter-spacing: .06em; }
+[data-dir="obsidian"] .gauge {
+  height: 7px;
+  margin-top: 16px;
+  background: #0a0a0c;
+  border: 1px solid #202026;
+  border-radius: 1px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.8);
+}
+[data-dir="obsidian"] .gauge-fill {
+  inset: 0 auto 0 0;
+  background: linear-gradient(90deg, var(--amber-dim), var(--amber));
+  box-shadow: 0 0 14px rgba(255,162,58,.5);
+  transition: width .5s cubic-bezier(.2,.8,.3,1);
+}
+[data-dir="obsidian"] .ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 8.5px;
+  color: #3e3e46;
+  letter-spacing: .1em;
+}
+[data-dir="obsidian"] .tracker { gap: 3px; flex-wrap: nowrap; }
+[data-dir="obsidian"] .tracker b {
+  width: 23px; height: 29px;
+  font-size: 13px;
+  border-radius: 2px;
+  background: #0a0a0c;
+  border: 1px solid #1f1f25;
+  color: #4a4a53;
+  transition: all .3s;
+}
+[data-dir="obsidian"] .tracker b[data-s="live"] { color: var(--text-hi); border-color: #2c2c34; }
+[data-dir="obsidian"] .tracker b[data-s="locked"] {
+  color: var(--ink); background: var(--amber); border-color: var(--amber);
+  box-shadow: 0 0 14px rgba(255,162,58,.45);
+}
+[data-dir="obsidian"] .tracker b[data-s="struck"] { color: #2a2a31; text-decoration: line-through; }
+[data-dir="obsidian"] .legend { font-size: 9px; color: #46464e; line-height: 1.9; letter-spacing: .04em; }
+
+/* console */
+[data-dir="obsidian"] .console {
+  background: var(--panel);
+  border: 1px solid var(--bezel);
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 var(--bezel-hi), 0 20px 48px -22px #000;
+  padding: 18px;
+  display: flex;
+  align-items: flex-end;
+  gap: 26px;
+  flex-wrap: wrap;
+}
+[data-dir="obsidian"] .entry { gap: 8px; }
+[data-dir="obsidian"] .cell {
+  width: 56px; height: 66px;
+  font-size: 30px;
+  font-weight: 300;
+  color: var(--amber);
+  background: #08080a;
+  border: 1px solid #202026;
+  border-radius: 3px;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,.85);
+  text-shadow: 0 0 18px rgba(255,162,58,.45);
+  font-variant-numeric: tabular-nums;
+  transition: border-color .18s;
+}
+[data-dir="obsidian"] .cell[data-active="1"] { border-color: var(--amber-dim); }
+[data-dir="obsidian"] .cell:empty::after { content: "·"; color: #26262c; text-shadow: none; }
+[data-dir="obsidian"] .pad { grid-template-columns: repeat(5, 40px); gap: 6px; }
+[data-dir="obsidian"] .key {
+  height: 36px;
+  font-size: 14px;
+  color: var(--text-hi);
+  background: linear-gradient(to bottom, var(--panel-hi), #0d0d10);
+  border: 1px solid #2a2a31;
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 #3a3a42, 0 2px 4px rgba(0,0,0,.6);
+  transition: transform .07s, background .14s;
+}
+[data-dir="obsidian"] .key:hover { background: linear-gradient(to bottom, #1d1d22, #121216); }
+[data-dir="obsidian"] .key:active { transform: translateY(1.5px); box-shadow: inset 0 1px 3px rgba(0,0,0,.8); }
+[data-dir="obsidian"] .key[data-k="del"] { grid-column: span 2; font-size: 9px; font-family: 'Archivo',sans-serif; letter-spacing: .18em; font-weight: 600; }
+[data-dir="obsidian"] .acts { gap: 8px; flex-direction: column; margin-left: auto; }
+body[data-dir="obsidian"][data-mode="solo"] .acts { margin-left: 24px; }
+[data-dir="obsidian"] .act {
+  padding: 10px 20px;
+  font-family: 'Archivo', sans-serif;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--text-hi);
+  background: #15151a;
+  border: 1px solid #2c2c34;
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 #38383f;
+  transition: all .16s;
+  text-align: center;
+}
+[data-dir="obsidian"] .act:hover:not(:disabled) { background: #1f1f26; border-color: #42424a; }
+[data-dir="obsidian"] .act[data-a="commit"] { color: var(--amber); border-color: var(--amber-dim); }
+[data-dir="obsidian"] .act[data-a="commit"]:hover:not(:disabled) { background: rgba(255,162,58,.12); border-color: var(--amber); }
+[data-dir="obsidian"] .act:disabled { opacity: .3; }
+[data-dir="obsidian"] .act small { display: block; font-size: 8px; letter-spacing: .14em; opacity: .5; margin-top: 3px; }
+
+[data-dir="obsidian"] .statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--bezel);
+  font-family: 'Archivo', sans-serif;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: #4e4e56;
+  flex-wrap: wrap;
+}
+[data-dir="obsidian"] .st-turn { color: var(--amber); display: flex; align-items: center; gap: 9px; }
+[data-dir="obsidian"] .st-turn::before {
+  content: "";
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 10px var(--amber);
+  animation: obs-pulse 1.5s ease-in-out infinite;
+}
+@keyframes obs-pulse { 50% { opacity: .25; } }
+
+[data-dir="obsidian"] .overlay { background: rgba(5,5,6,.9); backdrop-filter: blur(6px); }
+[data-dir="obsidian"] .sheet {
+  max-width: 640px;
+  background: var(--panel);
+  border: 1px solid var(--bezel);
+  border-radius: 3px;
+  box-shadow: inset 0 1px 0 var(--bezel-hi), 0 40px 90px -30px #000;
+  padding: 40px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+}
+[data-dir="obsidian"] .sheet h2 {
+  font-family: 'Archivo', sans-serif;
+  font-size: 13px; font-weight: 600; letter-spacing: .34em;
+  text-transform: uppercase; color: var(--amber);
+  margin: 0 0 22px;
+}
+[data-dir="obsidian"] .sheet h3 {
+  font-family: 'Archivo', sans-serif;
+  font-size: 9px; font-weight: 600; letter-spacing: .24em;
+  text-transform: uppercase; color: #55555d;
+  margin: 26px 0 9px;
+}
+[data-dir="obsidian"] .sheet p { font-size: 12.5px; line-height: 1.85; margin: 0 0 11px; }
+[data-dir="obsidian"] .sheet em { color: var(--amber); font-style: normal; }
+[data-dir="obsidian"] .sheet .close {
+  margin-top: 28px;
+  padding: 10px 22px;
+  font-family: 'Archivo', sans-serif;
+  font-size: 9.5px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--text-hi); background: #15151a;
+  border: 1px solid #2c2c34; border-radius: 3px;
+}
+
+@media (max-width: 900px) {
+  [data-dir="obsidian"] .stage {
+    grid-template-columns: minmax(0,1fr);
+    grid-template-areas: "m" "l" "r" "c" "s";
+    padding: 16px;
+  }
+}
+
+/* ╔═══════════════════════════════════════════════════════════════╗
+   ║  II. DOSSIER — a 1940s cryptanalysis case file                ║
+   ║  pressed paper · oxblood stamps · redaction bars              ║
+   ╚═══════════════════════════════════════════════════════════════╝ */
+
+[data-dir="dossier"] {
+  --paper: #ded3bd;
+  --paper-hi: #ece3d0;
+  --paper-lo: #c9bda4;
+  --ink: #221d17;
+  --ink-soft: #5c5244;
+  --oxblood: #74201d;
+  --carbon: #2f3f63;
+  --rule: #a99c82;
+}
+
+[data-dir="dossier"] .stage {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Courier Prime', 'Courier New', monospace;
+  grid-template-columns: 232px minmax(0,1fr);
+  grid-template-rows: auto minmax(0,1fr) auto auto;
+  grid-template-areas:
+    "m m"
+    "r l"
+    "r c"
+    "s s";
+  padding: 32px 36px;
+  gap: 0 40px;
+}
+
+[data-dir="dossier"] .ornament {
+  background:
+    linear-gradient(95deg, rgba(0,0,0,.05) 0%, transparent 14%, transparent 86%, rgba(0,0,0,.07) 100%),
+    radial-gradient(900px 500px at 18% 8%, rgba(255,255,255,.3), transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.3'/%3E%3C/svg%3E");
+}
+[data-dir="dossier"] .ornament::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; left: 232px;
+  width: 1px;
+  background: var(--oxblood);
+  opacity: .32;
+}
+
+[data-dir="dossier"] .masthead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 12px;
+  border-bottom: 3px double var(--ink);
+  margin-bottom: 26px;
+  flex-wrap: wrap;
+}
+[data-dir="dossier"] .mark {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  font-size: 30px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+[data-dir="dossier"] .tagline {
+  font-family: 'Oswald', sans-serif;
+  font-size: 9.5px; font-weight: 400; letter-spacing: .3em;
+  text-transform: uppercase; color: var(--oxblood);
+  margin-top: 5px;
+}
+[data-dir="dossier"] .meta { display: flex; gap: 30px; }
+[data-dir="dossier"] .meta i {
+  display: block; font-style: normal;
+  font-family: 'Oswald', sans-serif;
+  font-size: 8.5px; font-weight: 400; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--ink-soft);
+}
+[data-dir="dossier"] .meta b { font-size: 15px; font-weight: 700; }
+
+/* typed transmission log */
+[data-dir="dossier"] .ledger {
+  overflow-y: auto; min-height: 250px; padding-right: 8px;
+  display: flex; flex-direction: column;
+}
+[data-dir="dossier"] .ledger-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px; font-weight: 500; letter-spacing: .3em;
+  text-transform: uppercase; color: var(--ink-soft);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 14px;
+}
+[data-dir="dossier"] .rows { gap: 2px; margin-top: auto; }
+[data-dir="dossier"] .row {
+  grid-template-columns: 126px auto auto minmax(0,1fr);
+  gap: 26px;
+  padding: 9px 0;
+  border-bottom: 1px dotted var(--rule);
+  animation: dos-thud .34s cubic-bezier(.3,1.5,.5,1) both;
+}
+@keyframes dos-thud {
+  from { opacity: 0; transform: scale(1.04) rotate(-.5deg); }
+  to   { opacity: 1; transform: none; }
+}
+[data-dir="dossier"] .row-who {
+  font-family: 'Oswald', sans-serif;
+  font-size: 9.5px; font-weight: 500; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ink-soft);
+}
+[data-dir="dossier"] .row[data-by="you"] .row-who { color: var(--oxblood); }
+[data-dir="dossier"] .row-digits { gap: 11px; }
+[data-dir="dossier"] .row-digits span { width: 19px; font-size: 21px; font-weight: 700; }
+[data-dir="dossier"] .row-redact {
+  display: flex; align-items: center; gap: 12px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 9px; font-weight: 500; letter-spacing: .24em;
+  text-transform: uppercase; color: var(--ink-soft);
+}
+[data-dir="dossier"] .row-redact::before {
+  content: "";
+  width: 118px; height: 21px;
+  background: #16120e;
+  box-shadow: 1px 1px 0 rgba(0,0,0,.25);
+}
+[data-dir="dossier"] .row-marks, [data-dir="dossier"] .row-count { display: none; }
+[data-dir="dossier"] .row-text {
+  justify-self: start;
+  font-family: 'Oswald', sans-serif;
+  font-size: 9.5px; font-weight: 500; letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--oxblood);
+  border: 2px solid var(--oxblood);
+  padding: 4px 11px;
+  transform: rotate(-1.6deg);
+  opacity: .82;
+  mix-blend-mode: multiply;
+}
+[data-dir="dossier"] .row[data-kind="commit"] .row-text { color: var(--carbon); border-color: var(--carbon); }
+
+/* left margin: the working notes */
+[data-dir="dossier"] .readout { display: flex; flex-direction: column; gap: 28px; padding-top: 4px; }
+[data-dir="dossier"] .ro-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 9.5px; font-weight: 500; letter-spacing: .26em;
+  text-transform: uppercase; color: var(--ink-soft);
+  margin-bottom: 9px;
+}
+[data-dir="dossier"] .ro-big { font-family: 'Oswald', sans-serif; font-size: 52px; font-weight: 300; line-height: .88; }
+[data-dir="dossier"] .ro-sub { font-size: 11.5px; color: var(--ink-soft); margin-top: 6px; }
+[data-dir="dossier"] .gauge { height: 10px; margin-top: 14px; background: var(--paper-lo); border: 1px solid var(--ink); }
+[data-dir="dossier"] .gauge-fill {
+  inset: 0 auto 0 0;
+  background: repeating-linear-gradient(135deg, var(--oxblood) 0 4px, #8c2b27 4px 8px);
+  transition: width .45s ease;
+}
+[data-dir="dossier"] .ticks { display: flex; justify-content: space-between; margin-top: 5px; font-size: 9px; color: var(--ink-soft); }
+[data-dir="dossier"] .tracker { flex-direction: column; gap: 0; }
+[data-dir="dossier"] .tracker b {
+  grid-template-columns: 22px 1fr;
+  display: grid;
+  place-items: center start;
+  height: 24px;
+  font-size: 15px; font-weight: 700;
+  border-bottom: 1px dotted var(--rule);
+  color: var(--ink);
+}
+[data-dir="dossier"] .tracker b::after {
+  font-family: 'Oswald', sans-serif;
+  font-size: 8.5px; font-weight: 400; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--ink-soft);
+}
+[data-dir="dossier"] .tracker b[data-s="live"]::after { content: "at large"; }
+[data-dir="dossier"] .tracker b[data-s="locked"]::after { content: "in code"; color: var(--oxblood); }
+[data-dir="dossier"] .tracker b[data-s="struck"]::after { content: "eliminated"; }
+[data-dir="dossier"] .tracker b[data-s="struck"] { color: var(--ink-soft); text-decoration: line-through; }
+[data-dir="dossier"] .tracker b[data-s="locked"] { color: var(--oxblood); }
+[data-dir="dossier"] .legend { font-size: 11px; color: var(--ink-soft); line-height: 1.8; }
+
+[data-dir="dossier"] .console {
+  display: flex; align-items: flex-end; gap: 30px;
+  padding-top: 22px; margin-top: 18px;
+  border-top: 3px double var(--ink);
+  flex-wrap: wrap;
+}
+[data-dir="dossier"] .entry { gap: 12px; }
+[data-dir="dossier"] .cell {
+  width: 50px; height: 60px;
+  font-size: 34px; font-weight: 700;
+  background: var(--paper-hi);
+  border: 1px solid var(--ink);
+  box-shadow: 2px 2px 0 rgba(34,29,23,.2);
+}
+[data-dir="dossier"] .cell:empty::after { content: ""; width: 20px; height: 1px; background: var(--ink-soft); }
+[data-dir="dossier"] .cell[data-active="1"] { border-color: var(--oxblood); border-width: 2px; }
+[data-dir="dossier"] .pad { grid-template-columns: repeat(5, 36px); gap: 7px; }
+[data-dir="dossier"] .key {
+  height: 36px;
+  font-size: 15px; font-weight: 700;
+  background: var(--paper-hi);
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  box-shadow: 1.5px 2px 0 rgba(34,29,23,.3);
+  transition: transform .07s, box-shadow .07s;
+}
+[data-dir="dossier"] .key:active { transform: translate(1.5px, 2px); box-shadow: none; }
+[data-dir="dossier"] .key[data-k="del"] {
+  grid-column: span 2; border-radius: 18px;
+  font-family: 'Oswald', sans-serif; font-size: 9px;
+  letter-spacing: .18em; font-weight: 500;
+}
+[data-dir="dossier"] .acts { gap: 10px; flex-direction: column; }
+[data-dir="dossier"] .act {
+  padding: 9px 18px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px; font-weight: 500; letter-spacing: .2em;
+  text-transform: uppercase;
+  border: 2px solid var(--ink);
+  background: var(--paper-hi);
+  box-shadow: 2px 2px 0 rgba(34,29,23,.3);
+  transition: all .1s;
+  text-align: center;
+}
+[data-dir="dossier"] .act:hover:not(:disabled) { background: #f3ebd9; }
+[data-dir="dossier"] .act:active:not(:disabled) { transform: translate(2px,2px); box-shadow: none; }
+[data-dir="dossier"] .act[data-a="commit"] { color: var(--oxblood); border-color: var(--oxblood); }
+[data-dir="dossier"] .act:disabled { opacity: .35; }
+[data-dir="dossier"] .act small { display: block; font-size: 8px; letter-spacing: .14em; opacity: .6; margin-top: 2px; }
+
+[data-dir="dossier"] .statusbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  margin-top: 20px; padding-top: 11px;
+  border-top: 1px solid var(--rule);
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px; font-weight: 400; letter-spacing: .24em;
+  text-transform: uppercase; color: var(--ink-soft);
+  flex-wrap: wrap;
+}
+[data-dir="dossier"] .st-turn { color: var(--oxblood); font-weight: 600; }
+
+[data-dir="dossier"] .overlay { background: rgba(34,29,23,.62); }
+[data-dir="dossier"] .sheet {
+  max-width: 620px;
+  background: var(--paper-hi);
+  border: 1px solid var(--ink);
+  box-shadow: 10px 12px 0 rgba(34,29,23,.3);
+  padding: 44px;
+  color: var(--ink);
+  font-family: 'Courier Prime', monospace;
+}
+[data-dir="dossier"] .sheet h2 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 22px; font-weight: 600; letter-spacing: .22em;
+  text-transform: uppercase; margin: 0 0 6px;
+}
+[data-dir="dossier"] .sheet h2 + * { border-top: 3px double var(--ink); padding-top: 20px; }
+[data-dir="dossier"] .sheet h3 {
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px; font-weight: 500; letter-spacing: .26em;
+  text-transform: uppercase; color: var(--oxblood);
+  margin: 26px 0 8px;
+}
+[data-dir="dossier"] .sheet p { font-size: 13.5px; line-height: 1.8; margin: 0 0 11px; }
+[data-dir="dossier"] .sheet em { font-style: normal; font-weight: 700; color: var(--oxblood); }
+[data-dir="dossier"] .sheet .close {
+  margin-top: 28px; padding: 9px 20px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 10px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase;
+  border: 2px solid var(--ink); background: var(--paper);
+  box-shadow: 2px 2px 0 rgba(34,29,23,.3);
+}
+
+@media (max-width: 900px) {
+  [data-dir="dossier"] .stage {
+    grid-template-columns: minmax(0,1fr);
+    grid-template-areas: "m" "l" "c" "r" "s";
+    padding: 18px;
+  }
+  [data-dir="dossier"] .ornament::after { display: none; }
+  [data-dir="dossier"] .mark { font-size: 22px; }
+}
+
+/* ╔═══════════════════════════════════════════════════════════════╗
+   ║  III. ORRERY — deduction as celestial mechanics               ║
+   ║  indigo void · aged brass · feedback delivered as light        ║
+   ╚═══════════════════════════════════════════════════════════════╝ */
+
+[data-dir="orrery"] {
+  --void: #05070f;
+  --void-hi: #141c3e;
+  --brass: #c9a227;
+  --brass-hi: #ecd27e;
+  --brass-dim: #6b5a26;
+  --star: #ece7da;
+  --star-dim: #8e94ad;
+}
+
+[data-dir="orrery"] .stage {
+  background: radial-gradient(1200px 820px at 50% 24%, var(--void-hi), var(--void) 68%);
+  color: var(--star-dim);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  grid-template-columns: minmax(0,1fr);
+  grid-template-rows: auto auto auto auto auto;
+  grid-template-areas: "m" "l" "r" "c" "s";
+  justify-items: center;
+  padding: 30px 24px 92px;
+  gap: 20px;
+}
+
+/* Wide: the log and the field sit either side of the meridian,
+   with the dial centred beneath them. */
+@media (min-width: 1040px) {
+  [data-dir="orrery"] .stage {
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+    grid-template-areas:
+      "m m"
+      "l r"
+      "c c"
+      "s s";
+    column-gap: 56px;
+    align-items: start;
+  }
+  [data-dir="orrery"] .ledger { justify-self: end; max-width: 500px; }
+  [data-dir="orrery"] .readout { justify-self: start; max-width: 380px; padding-top: 34px; }
+  [data-dir="orrery"] .console { grid-column: 1 / -1; }
+}
+
+[data-dir="orrery"] .ornament { overflow: hidden; }
+[data-dir="orrery"] .ornament svg { position: absolute; left: 50%; top: 40%; transform: translate(-50%,-50%); width: 1180px; height: 1180px; max-width: 190vw; }
+[data-dir="orrery"] .ring { fill: none; stroke: var(--brass); opacity: .085; transform-origin: 590px 590px; }
+[data-dir="orrery"] .r1 { animation: orr-spin 150s linear infinite; }
+[data-dir="orrery"] .r2 { animation: orr-spin 104s linear infinite reverse; }
+[data-dir="orrery"] .r3 { animation: orr-spin 220s linear infinite; }
+@keyframes orr-spin { to { transform: rotate(360deg); } }
+[data-dir="orrery"] .ornament .stars circle { fill: var(--star); }
+
+[data-dir="orrery"] .masthead { text-align: center; }
+[data-dir="orrery"] .mark {
+  font-family: 'Cinzel', serif;
+  font-weight: 500;
+  font-size: 23px;
+  letter-spacing: .58em;
+  text-transform: uppercase;
+  color: var(--brass-hi);
+  text-indent: .58em;
+}
+[data-dir="orrery"] .tagline {
+  font-size: 14.5px; font-style: italic; color: var(--star-dim);
+  margin-top: 9px; letter-spacing: .03em;
+}
+[data-dir="orrery"] .meta { display: flex; gap: 42px; justify-content: center; margin-top: 14px; }
+[data-dir="orrery"] .meta i {
+  display: block; font-style: normal;
+  font-family: 'Cinzel', serif;
+  font-size: 8px; font-weight: 400; letter-spacing: .3em;
+  text-transform: uppercase; color: var(--brass-dim);
+  margin-bottom: 5px;
+}
+[data-dir="orrery"] .meta b { font-size: 19px; font-weight: 500; color: var(--star); }
+
+[data-dir="orrery"] .ledger { width: 100%; max-width: 560px; }
+[data-dir="orrery"] .ledger-label {
+  font-family: 'Cinzel', serif;
+  font-size: 8.5px; font-weight: 400; letter-spacing: .36em;
+  text-transform: uppercase; color: var(--brass-dim);
+  text-align: center;
+  padding-bottom: 16px;
+  margin-bottom: 6px;
+}
+[data-dir="orrery"] .rows { gap: 0; }
+[data-dir="orrery"] .row {
+  grid-template-columns: 1fr auto 1fr;
+  gap: 22px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(201,162,39,.11);
+  animation: orr-ignite .7s cubic-bezier(.2,.7,.3,1) both;
+}
+@keyframes orr-ignite { from { opacity: 0; filter: blur(5px); } }
+[data-dir="orrery"] .row-who {
+  font-family: 'Cinzel', serif;
+  font-size: 8px; font-weight: 400; letter-spacing: .26em;
+  text-transform: uppercase; color: var(--brass-dim);
+  text-align: right;
+}
+[data-dir="orrery"] .row[data-by="you"] .row-who { color: var(--brass); }
+[data-dir="orrery"] .row-digits { gap: 16px; justify-content: center; }
+[data-dir="orrery"] .row-digits span {
+  width: 20px; font-size: 25px; font-weight: 400;
+  color: var(--star); letter-spacing: 0;
+}
+[data-dir="orrery"] .row-redact {
+  display: flex; align-items: center; gap: 13px;
+  font-family: 'Cinzel', serif;
+  font-size: 8px; letter-spacing: .26em; text-transform: uppercase;
+  color: var(--brass-dim);
+}
+[data-dir="orrery"] .row-redact::before {
+  content: "";
+  width: 104px; height: 1px;
+  background: repeating-linear-gradient(90deg, var(--brass-dim) 0 3px, transparent 3px 9px);
+}
+[data-dir="orrery"] .row-marks { display: none; }
+[data-dir="orrery"] .row-count { display: none; }
+[data-dir="orrery"] .row-text {
+  font-size: 15px; font-style: italic; color: var(--brass-hi);
+  letter-spacing: .02em;
+}
+[data-dir="orrery"] .row[data-kind="commit"] .row-text { color: var(--star); }
+
+[data-dir="orrery"] .readout {
+  width: 100%; max-width: 560px; text-align: center;
+  display: flex; flex-direction: column; gap: 32px;
+}
+[data-dir="orrery"] .ro-label {
+  font-family: 'Cinzel', serif;
+  font-size: 8px; letter-spacing: .34em; text-transform: uppercase;
+  color: var(--brass-dim); margin-bottom: 14px;
+}
+[data-dir="orrery"] .ro-big { font-size: 19px; font-style: italic; font-weight: 400; color: var(--star); line-height: 1.5; }
+[data-dir="orrery"] .ro-sub { display: none; }
+[data-dir="orrery"] .gauge { display: none; }
+[data-dir="orrery"] .ticks { display: none; }
+[data-dir="orrery"] .tracker { justify-content: center; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+[data-dir="orrery"] .tracker b {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  font-size: 17px; font-weight: 400;
+  border: 1px solid rgba(201,162,39,.2);
+  color: var(--star-dim);
+  transition: all .55s cubic-bezier(.2,.7,.3,1);
+}
+[data-dir="orrery"] .tracker b[data-s="live"] { color: var(--star); border-color: rgba(201,162,39,.4); }
+[data-dir="orrery"] .tracker b[data-s="locked"] {
+  color: var(--void); background: var(--brass-hi); border-color: var(--brass-hi);
+  box-shadow: 0 0 28px rgba(236,210,126,.6);
+}
+[data-dir="orrery"] .tracker b[data-s="struck"] { color: #343a52; border-color: rgba(142,148,173,.08); }
+[data-dir="orrery"] .legend { font-size: 13.5px; font-style: italic; color: var(--star-dim); margin-top: 16px; line-height: 1.8; }
+
+[data-dir="orrery"] .console {
+  display: flex; flex-direction: column; align-items: center; gap: 22px;
+  width: 100%; max-width: 560px;
+}
+[data-dir="orrery"] .entry { gap: 20px; }
+[data-dir="orrery"] .cell {
+  width: 70px; height: 78px;
+  font-size: 44px; font-weight: 400;
+  color: var(--brass-hi);
+  border-bottom: 1px solid var(--brass-dim);
+  text-shadow: 0 0 26px rgba(236,210,126,.45);
+}
+[data-dir="orrery"] .cell:empty::after { content: ""; }
+[data-dir="orrery"] .cell[data-active="1"] { border-bottom-color: var(--brass-hi); border-bottom-width: 2px; }
+/* the arc keypad — brass dials on a curve */
+[data-dir="orrery"] .pad {
+  display: block;
+  position: relative;
+  width: 400px; height: 138px;
+  max-width: 100%;
+  margin-bottom: 6px;
+}
+[data-dir="orrery"] .key {
+  position: absolute;
+  left: 50%; top: 100%;
+  width: 40px; height: 40px;
+  margin: -20px 0 0 -20px;
+  border-radius: 50%;
+  font-size: 17px;
+  color: var(--star);
+  background: radial-gradient(circle at 36% 30%, rgba(236,210,126,.22), rgba(5,7,15,.6));
+  border: 1px solid rgba(201,162,39,.3);
+  transition: all .22s;
+}
+[data-dir="orrery"] .key:hover {
+  border-color: var(--brass-hi);
+  box-shadow: 0 0 22px rgba(236,210,126,.4);
+}
+[data-dir="orrery"] .key[data-k="del"] {
+  position: static; display: inline-grid; margin: 0;
+  width: auto; height: 34px; padding: 0 20px;
+  border-radius: 17px;
+  font-family: 'Cinzel', serif; font-size: 8.5px;
+  letter-spacing: .24em; text-transform: uppercase;
+}
+[data-dir="orrery"] .pad-del { position: absolute; left: 50%; bottom: 4px; transform: translateX(-50%); }
+[data-dir="orrery"] .acts { gap: 16px; justify-content: center; flex-wrap: wrap; }
+[data-dir="orrery"] .act {
+  padding: 11px 26px;
+  font-family: 'Cinzel', serif;
+  font-size: 9.5px; font-weight: 400; letter-spacing: .26em;
+  text-transform: uppercase;
+  color: var(--star);
+  border: 1px solid rgba(201,162,39,.32);
+  border-radius: 2px;
+  background: rgba(201,162,39,.05);
+  transition: all .25s;
+  text-align: center;
+}
+[data-dir="orrery"] .act:hover:not(:disabled) {
+  border-color: var(--brass-hi); background: rgba(236,210,126,.11);
+  box-shadow: 0 0 26px rgba(236,210,126,.18);
+}
+[data-dir="orrery"] .act[data-a="commit"] { color: var(--brass-hi); border-color: var(--brass); }
+[data-dir="orrery"] .act:disabled { opacity: .26; }
+[data-dir="orrery"] .act small {
+  display: block; font-family: 'Cormorant Garamond', serif;
+  font-size: 11px; font-style: italic; letter-spacing: 0;
+  text-transform: none; opacity: .6; margin-top: 3px;
+}
+
+[data-dir="orrery"] .statusbar {
+  display: flex; align-items: center; gap: 30px;
+  font-family: 'Cinzel', serif;
+  font-size: 8.5px; font-weight: 400; letter-spacing: .28em;
+  text-transform: uppercase; color: var(--brass-dim);
+  flex-wrap: wrap; justify-content: center; text-align: center;
+}
+[data-dir="orrery"] .st-turn { color: var(--brass-hi); }
+
+[data-dir="orrery"] .overlay { background: rgba(5,7,15,.9); backdrop-filter: blur(8px); }
+[data-dir="orrery"] .sheet {
+  max-width: 620px; text-align: center;
+  padding: 52px 46px;
+  border: 1px solid rgba(201,162,39,.26);
+  background: radial-gradient(700px 400px at 50% 0%, rgba(20,28,62,.95), rgba(5,7,15,.97));
+  color: var(--star-dim);
+  font-family: 'Cormorant Garamond', serif;
+}
+[data-dir="orrery"] .sheet h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 15px; font-weight: 500; letter-spacing: .4em;
+  text-transform: uppercase; color: var(--brass-hi);
+  margin: 0 0 26px; text-indent: .4em;
+}
+[data-dir="orrery"] .sheet h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 8.5px; font-weight: 400; letter-spacing: .3em;
+  text-transform: uppercase; color: var(--brass-dim);
+  margin: 30px 0 10px;
+}
+[data-dir="orrery"] .sheet p { font-size: 16px; line-height: 1.85; margin: 0 0 12px; }
+[data-dir="orrery"] .sheet em { font-style: italic; color: var(--brass-hi); }
+[data-dir="orrery"] .sheet .close {
+  margin-top: 32px; padding: 11px 26px;
+  font-family: 'Cinzel', serif;
+  font-size: 9.5px; letter-spacing: .26em; text-transform: uppercase;
+  color: var(--star); border: 1px solid rgba(201,162,39,.32); border-radius: 2px;
+}
+
+@media (max-width: 620px) {
+  [data-dir="orrery"] .mark { font-size: 15px; letter-spacing: .36em; }
+  [data-dir="orrery"] .pad { width: 300px; height: 96px; }
+  [data-dir="orrery"] .key { width: 36px; height: 36px; margin: -18px 0 0 -18px; font-size: 14px; }
+  [data-dir="orrery"] .cell { width: 48px; height: 58px; font-size: 30px; }
+}
+
+/* ╔═══════════════════════════════════════════════════════════════╗
+   ║  IV. LEDGER — the deduction as an actuarial data sheet         ║
+   ║  paper white · one typeface · ultramarine · hairline rules     ║
+   ╚═══════════════════════════════════════════════════════════════╝ */
+
+[data-dir="ledger"] {
+  --sheet: #fbfbfa;
+  --sheet-alt: #f2f2f0;
+  --ink: #111112;
+  --ink-soft: #76767a;
+  --ink-faint: #b4b4b8;
+  --rule: #dededa;
+  --rule-hard: #111112;
+  --marine: #1b3fd6;
+  --marine-soft: #e8ecfd;
+}
+
+[data-dir="ledger"] .stage {
+  background: var(--sheet);
+  color: var(--ink);
+  font-family: 'Inter Tight', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  grid-template-columns: minmax(0,1fr) 268px;
+  grid-template-rows: auto minmax(0,1fr) auto auto;
+  grid-template-areas:
+    "m m"
+    "l r"
+    "c c"
+    "s s";
+  padding: 0;
+  gap: 0;
+}
+
+[data-dir="ledger"] .ornament { background: none; }
+
+[data-dir="ledger"] .masthead {
+  grid-column: 1 / -1;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 24px; flex-wrap: wrap;
+  padding: 26px 32px 16px;
+  border-bottom: 2px solid var(--rule-hard);
+}
+[data-dir="ledger"] .mark {
+  font-size: 15px; font-weight: 700; letter-spacing: -.01em;
+  text-transform: none;
+}
+[data-dir="ledger"] .mark::after {
+  content: "";
+  display: inline-block;
+  width: 7px; height: 7px;
+  margin-left: 9px;
+  background: var(--marine);
+  vertical-align: 1px;
+}
+[data-dir="ledger"] .tagline {
+  font-size: 11px; font-weight: 400; color: var(--ink-soft);
+  margin-top: 3px;
+}
+[data-dir="ledger"] .meta { display: flex; gap: 0; }
+[data-dir="ledger"] .meta div { padding-left: 24px; margin-left: 24px; border-left: 1px solid var(--rule); }
+[data-dir="ledger"] .meta div:first-child { border-left: none; margin-left: 0; padding-left: 0; }
+[data-dir="ledger"] .meta i {
+  display: block; font-style: normal;
+  font-size: 9px; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-faint);
+  margin-bottom: 3px;
+}
+[data-dir="ledger"] .meta b { font-size: 16px; font-weight: 500; }
+
+/* the table */
+[data-dir="ledger"] .ledger {
+  padding: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--rule);
+  min-height: 260px;
+}
+[data-dir="ledger"] .ledger-label {
+  display: grid;
+  grid-template-columns: 44px 1fr 68px 68px 1fr;
+  gap: 0;
+  padding: 0;
+  font-size: 9px; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-faint);
+  border-bottom: 1px solid var(--rule-hard);
+  background: var(--sheet);
+  position: sticky; top: 0; z-index: 2;
+}
+[data-dir="ledger"] .ledger-label span { padding: 10px 14px; }
+[data-dir="ledger"] .ledger-label span + span { border-left: 1px solid var(--rule); }
+[data-dir="ledger"] .ledger-label .num, [data-dir="ledger"] .ledger-label .ex, [data-dir="ledger"] .ledger-label .nr { text-align: right; }
+[data-dir="ledger"] .rows { gap: 0; }
+[data-dir="ledger"] .row {
+  grid-template-columns: 44px 1fr 68px 68px 1fr;
+  gap: 0;
+  border-bottom: 1px solid var(--rule);
+  animation: led-in .22s ease both;
+}
+@keyframes led-in { from { opacity: 0; background: var(--marine-soft); } }
+[data-dir="ledger"] .row:nth-child(even) { background: var(--sheet-alt); }
+[data-dir="ledger"] .row > * { padding: 12px 14px; }
+[data-dir="ledger"] .row > * + * { border-left: 1px solid var(--rule); }
+[data-dir="ledger"] .row-idx {
+  font-size: 11px; color: var(--ink-faint); text-align: right;
+  font-weight: 500;
+}
+[data-dir="ledger"] .row-who {
+  display: none;
+}
+[data-dir="ledger"] .row-party {
+  font-size: 10px; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-soft);
+  display: block; margin-bottom: 4px;
+}
+[data-dir="ledger"] .row[data-by="you"] .row-party { color: var(--marine); }
+[data-dir="ledger"] .row-digits { gap: 7px; }
+[data-dir="ledger"] .row-digits span {
+  width: 22px; font-size: 17px; font-weight: 500;
+}
+[data-dir="ledger"] .row-redact {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 10px; font-weight: 600; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-faint);
+}
+[data-dir="ledger"] .row-redact::before {
+  content: "";
+  width: 92px; height: 17px;
+  background: repeating-linear-gradient(90deg, var(--ink-faint) 0 2px, transparent 2px 5px);
+}
+[data-dir="ledger"] .row-marks { display: none; }
+[data-dir="ledger"] .row-text { display: none; }
+[data-dir="ledger"] .row-bulls, [data-dir="ledger"] .row-cows {
+  font-size: 17px; font-weight: 500; text-align: right;
+}
+[data-dir="ledger"] .row-bulls { color: var(--marine); }
+[data-dir="ledger"] .row-cows { color: var(--ink-soft); }
+[data-dir="ledger"] .row-bulls[data-z="1"], [data-dir="ledger"] .row-cows[data-z="1"] { color: var(--ink-faint); }
+/* the signature: candidate collapse quantified inline, per row */
+[data-dir="ledger"] .row-count {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11px; color: var(--ink-soft);
+}
+[data-dir="ledger"] .spark { flex: 1; height: 5px; background: var(--rule); position: relative; min-width: 40px; }
+[data-dir="ledger"] .spark i { position: absolute; inset: 0 auto 0 0; background: var(--marine); }
+[data-dir="ledger"] .row-count b { font-weight: 500; color: var(--ink); min-width: 42px; text-align: right; }
+
+[data-dir="ledger"] .readout { padding: 22px 24px; display: flex; flex-direction: column; gap: 26px; }
+[data-dir="ledger"] .ro-label {
+  font-size: 9px; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-faint);
+  padding-bottom: 8px; border-bottom: 1px solid var(--rule-hard);
+  margin-bottom: 12px;
+}
+[data-dir="ledger"] .ro-big { font-size: 42px; font-weight: 300; letter-spacing: -.03em; line-height: .95; }
+[data-dir="ledger"] .ro-sub { font-size: 11px; color: var(--ink-soft); margin-top: 6px; }
+[data-dir="ledger"] .gauge { height: 4px; margin-top: 16px; background: var(--rule); }
+[data-dir="ledger"] .gauge-fill { inset: 0 auto 0 0; background: var(--marine); transition: width .35s ease; }
+[data-dir="ledger"] .ticks { display: flex; justify-content: space-between; margin-top: 5px; font-size: 9px; color: var(--ink-faint); }
+[data-dir="ledger"] .tracker { gap: 0; flex-wrap: wrap; border: 1px solid var(--rule); }
+[data-dir="ledger"] .tracker b {
+  width: 10%; height: 34px;
+  font-size: 13px; font-weight: 500;
+  border-right: 1px solid var(--rule);
+  color: var(--ink);
+  transition: background .2s;
+}
+[data-dir="ledger"] .tracker b:last-child { border-right: none; }
+[data-dir="ledger"] .tracker b[data-s="locked"] { background: var(--marine); color: #fff; }
+[data-dir="ledger"] .tracker b[data-s="struck"] { background: var(--sheet-alt); color: var(--ink-faint); }
+[data-dir="ledger"] .legend { font-size: 11px; color: var(--ink-soft); line-height: 1.75; }
+
+[data-dir="ledger"] .console {
+  grid-column: 1 / -1;
+  display: flex; align-items: flex-end; gap: 28px; flex-wrap: wrap;
+  padding: 22px 32px;
+  border-top: 2px solid var(--rule-hard);
+  background: var(--sheet-alt);
+}
+[data-dir="ledger"] .entry { gap: 0; border: 1px solid var(--rule-hard); }
+[data-dir="ledger"] .cell {
+  width: 54px; height: 58px;
+  font-size: 26px; font-weight: 400;
+  background: var(--sheet);
+  border-right: 1px solid var(--rule);
+}
+[data-dir="ledger"] .cell:last-child { border-right: none; }
+[data-dir="ledger"] .cell[data-active="1"] { background: var(--marine-soft); box-shadow: inset 0 -3px 0 var(--marine); }
+[data-dir="ledger"] .cell:empty::after { content: ""; }
+[data-dir="ledger"] .pad { grid-template-columns: repeat(5, 38px); gap: 0; border: 1px solid var(--rule); }
+[data-dir="ledger"] .key {
+  height: 30px;
+  font-size: 12px; font-weight: 500;
+  background: var(--sheet);
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  transition: background .12s;
+}
+[data-dir="ledger"] .key:hover { background: var(--marine-soft); }
+[data-dir="ledger"] .key[data-k="del"] { grid-column: span 2; font-size: 9px; letter-spacing: .08em; font-weight: 600; text-transform: uppercase; }
+[data-dir="ledger"] .acts { gap: 0; border: 1px solid var(--rule-hard); }
+[data-dir="ledger"] .act {
+  padding: 11px 20px;
+  font-size: 10px; font-weight: 600; letter-spacing: .09em;
+  text-transform: uppercase;
+  background: var(--sheet);
+  border-right: 1px solid var(--rule);
+  transition: background .14s;
+  text-align: center;
+}
+[data-dir="ledger"] .act:last-child { border-right: none; }
+[data-dir="ledger"] .act:hover:not(:disabled) { background: var(--marine-soft); }
+[data-dir="ledger"] .act[data-a="commit"] { background: var(--marine); color: #fff; }
+[data-dir="ledger"] .act[data-a="commit"]:hover:not(:disabled) { background: #1733ad; }
+[data-dir="ledger"] .act:disabled { opacity: .32; }
+[data-dir="ledger"] .act small { display: block; font-size: 8.5px; font-weight: 500; opacity: .62; margin-top: 2px; letter-spacing: .04em; }
+
+[data-dir="ledger"] .statusbar {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 20px; flex-wrap: wrap;
+  padding: 11px 32px 26px;
+  font-size: 10px; font-weight: 600; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--ink-faint);
+  border-top: 1px solid var(--rule);
+}
+[data-dir="ledger"] .st-turn { color: var(--marine); }
+
+[data-dir="ledger"] .overlay { background: rgba(17,17,18,.58); }
+[data-dir="ledger"] .sheet {
+  max-width: 620px;
+  background: var(--sheet);
+  border: 1px solid var(--rule-hard);
+  padding: 40px;
+  color: var(--ink);
+  font-family: 'Inter Tight', sans-serif;
+}
+[data-dir="ledger"] .sheet h2 {
+  font-size: 19px; font-weight: 700; letter-spacing: -.01em;
+  margin: 0 0 4px;
+}
+[data-dir="ledger"] .sheet h2 + * { border-top: 2px solid var(--rule-hard); padding-top: 20px; }
+[data-dir="ledger"] .sheet h3 {
+  font-size: 9px; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-faint);
+  margin: 26px 0 8px;
+  padding-bottom: 6px; border-bottom: 1px solid var(--rule);
+}
+[data-dir="ledger"] .sheet p { font-size: 13.5px; line-height: 1.75; margin: 0 0 11px; color: #3a3a3e; }
+[data-dir="ledger"] .sheet em { font-style: normal; font-weight: 600; color: var(--marine); }
+[data-dir="ledger"] .sheet .close {
+  margin-top: 26px; padding: 11px 22px;
+  font-size: 10px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase;
+  background: var(--marine); color: #fff;
+}
+
+@media (max-width: 900px) {
+  [data-dir="ledger"] .stage {
+    grid-template-columns: minmax(0,1fr);
+    grid-template-areas: "m" "l" "r" "c" "s";
+  }
+  [data-dir="ledger"] .ledger { border-right: none; }
+  [data-dir="ledger"] .ledger-label, [data-dir="ledger"] .row { grid-template-columns: 34px 1fr 46px 46px; }
+  [data-dir="ledger"] .ledger-label .cd, [data-dir="ledger"] .row-count { display: none; }
+  [data-dir="ledger"] .masthead, [data-dir="ledger"] .console, [data-dir="ledger"] .statusbar { padding-left: 16px; padding-right: 16px; }
+}
+
+/* ╔═══════════════════════════════════════════════════════════════╗
+   ║  V. WORKSPACE — the game as a page in a Notion workspace      ║
+   ║  white page · hairline rules · a real database · select tags  ║
+   ╚═══════════════════════════════════════════════════════════════╝ */
+
+[data-dir="notion"] {
+  --n-page: #ffffff;
+  --n-rail: #f7f7f5;
+  --n-hover: rgba(55,53,47,.06);
+  --n-press: rgba(55,53,47,.09);
+  --n-ink: #37352f;
+  --n-ink-2: #787774;
+  --n-ink-3: #9b9a97;
+  --n-rule: #e9e9e7;
+  --n-blue: #2383e2;
+  --n-blue-hi: #1a76d2;
+  --n-blue-soft: #e7f3f8;
+  --n-green-bg: #dbeddb;  --n-green-ink: #1c3829;
+  --n-yellow-bg: #fdecc8; --n-yellow-ink: #402c1b;
+  --n-gray-bg: #e3e2e0;   --n-gray-ink: #32302c;
+  --n-blue-bg: #d3e5ef;   --n-blue-tag: #183347;
+  --n-code-bg: rgba(135,131,120,.15);
+  --n-code-ink: #eb5757;
+  --n-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Helvetica, Arial, sans-serif;
+  --n-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+[data-dir="notion"] .stage {
+  background: var(--n-page);
+  color: var(--n-ink);
+  font-family: var(--n-sans);
+  font-size: 16px;
+  grid-template-columns: 248px minmax(0,1fr) 300px;
+  grid-template-rows: auto auto auto auto;
+  grid-template-areas:
+    "nav m m"
+    "nav l r"
+    "nav c r"
+    "nav s s";
+  align-content: start;
+  align-items: start;
+  overflow: visible;
+  padding: 0;
+  gap: 0;
+}
+
+/* ── the sidebar is real navigation, so it lives in the ornament ─ */
+[data-dir="notion"] .ornament {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 248px;
+  overflow-y: auto;
+  z-index: 1;
+  pointer-events: auto;
+  background: var(--n-rail);
+  border-right: 1px solid var(--n-rule);
+  padding: 10px 8px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+[data-dir="notion"] .ws {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 8px; border-radius: 4px; margin-bottom: 10px;
+}
+[data-dir="notion"] .ws:hover { background: var(--n-hover); }
+[data-dir="notion"] .ws-badge {
+  width: 20px; height: 20px; border-radius: 4px; flex: none;
+  background: var(--n-ink); color: #fff;
+  font-size: 11px; font-weight: 600;
+  display: grid; place-items: center;
+}
+[data-dir="notion"] .ws-name { font-size: 14px; font-weight: 600; letter-spacing: -.01em; }
+[data-dir="notion"] .ws-chev { margin-left: auto; color: var(--n-ink-3); font-size: 11px; }
+
+[data-dir="notion"] .nav-item {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 5px 8px; border-radius: 4px;
+  font-size: 14px; color: var(--n-ink-2); text-align: left;
+  transition: background .12s;
+}
+[data-dir="notion"] .nav-item:hover { background: var(--n-hover); }
+[data-dir="notion"] .nav-item[aria-current="page"] {
+  background: var(--n-press); color: var(--n-ink); font-weight: 500;
+}
+[data-dir="notion"] .nav-item svg { width: 15px; height: 15px; flex: none; opacity: .66; }
+[data-dir="notion"] .nav-chev { color: var(--n-ink-3); font-size: 10px; width: 9px; flex: none; }
+[data-dir="notion"] .nav-sec {
+  font-size: 11.5px; font-weight: 600; color: var(--n-ink-3);
+  padding: 6px 8px 2px; margin-top: 16px;
+}
+[data-dir="notion"] .nav-new { font-size: 14px; color: var(--n-ink-3); padding: 6px 8px; margin-top: 10px; }
+
+/* ── page header: topbar, icon, title, intro, properties ───────── */
+[data-dir="notion"] .masthead { display: block; padding: 0 60px 0 72px; }
+[data-dir="notion"] .crumb {
+  display: flex; align-items: center; gap: 8px;
+  height: 45px; font-size: 14px; color: var(--n-ink-2);
+}
+[data-dir="notion"] .crumb-sep { color: var(--n-ink-3); }
+[data-dir="notion"] .crumb-right { margin-left: auto; display: flex; align-items: center; gap: 2px; font-size: 13px; }
+[data-dir="notion"] .crumb-right span { padding: 4px 8px; border-radius: 4px; }
+[data-dir="notion"] .crumb-right span:first-child:hover { background: var(--n-hover); }
+[data-dir="notion"] .crumb-right span:last-child { color: var(--n-ink-3); }
+
+[data-dir="notion"] .page-icon {
+  width: 70px; height: 70px; margin: 22px 0 8px;
+  border-radius: 6px; background: #f1f1ef;
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 7px;
+  padding: 15px;
+}
+[data-dir="notion"] .page-icon i { border-radius: 2px; background: #cfcecb; }
+[data-dir="notion"] .page-icon i:nth-child(1) { background: var(--n-blue); }
+[data-dir="notion"] .page-icon i:nth-child(2) { background: #dfab01; }
+
+[data-dir="notion"] .mark {
+  font-size: 40px; font-weight: 700; letter-spacing: -.022em;
+  line-height: 1.2; color: var(--n-ink);
+}
+[data-dir="notion"] .tagline {
+  font-size: 16px; line-height: 1.55; color: var(--n-ink-2);
+  margin-top: 14px; max-width: 44em;
+}
+
+[data-dir="notion"] .meta { display: flex; flex-direction: column; gap: 0; margin: 20px 0 0; padding-bottom: 20px; }
+[data-dir="notion"] .meta div {
+  display: grid; grid-template-columns: 164px minmax(0,1fr);
+  align-items: center; gap: 8px;
+  margin: 0; padding: 4px 6px; border: 0; border-radius: 4px;
+  max-width: 520px;
+}
+[data-dir="notion"] .meta div:hover { background: var(--n-hover); }
+[data-dir="notion"] .meta i {
+  display: flex; align-items: center; gap: 7px;
+  font-style: normal; font-size: 14px; color: var(--n-ink-2);
+  margin: 0; letter-spacing: 0; text-transform: none;
+}
+[data-dir="notion"] .meta i::before {
+  content: "#"; width: 15px; text-align: center;
+  font-family: var(--n-mono); font-size: 12px; color: var(--n-ink-3);
+}
+[data-dir="notion"] .meta div[data-kind="tag"] i::before { content: "\25CD"; }
+[data-dir="notion"] .meta b { font-size: 14px; font-weight: 400; }
+[data-dir="notion"] .meta div[data-kind="tag"] b {
+  justify-self: start; padding: 2px 8px; border-radius: 3px; font-size: 13px;
+  background: var(--n-gray-bg); color: var(--n-gray-ink);
+}
+[data-dir="notion"] .meta div[data-v="Solved"] b { background: var(--n-green-bg); color: var(--n-green-ink); }
+
+/* ── the log is an actual database table ───────────────────────── */
+[data-dir="notion"] .ledger {
+  padding: 0 46px 0 72px;
+  display: flex; flex-direction: column;
+}
+[data-dir="notion"] .ledger-label {
+  display: grid;
+  grid-template-columns: 40px minmax(0,1fr) 118px 118px 1fr;
+  padding: 0;
+  font-size: 12px; font-weight: 500; color: var(--n-ink-2);
+  letter-spacing: 0; text-transform: none;
+  background: var(--n-page);
+  border-bottom: 1px solid var(--n-rule);
+  position: sticky; top: 0; z-index: 2;
+}
+[data-dir="notion"] .ledger-label span {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 8px; border-left: 1px solid var(--n-rule);
+}
+[data-dir="notion"] .ledger-label span:first-child { border-left: none; }
+[data-dir="notion"] .ledger-label span::before { font-family: var(--n-mono); font-size: 11px; color: var(--n-ink-3); }
+[data-dir="notion"] .ledger-label .num::before { content: "#"; }
+[data-dir="notion"] .ledger-label .en::before { content: "Aa"; }
+[data-dir="notion"] .ledger-label .ex::before,
+[data-dir="notion"] .ledger-label .nr::before { content: "\25CD"; }
+[data-dir="notion"] .ledger-label .cd::before { content: "#"; }
+
+[data-dir="notion"] .rows { gap: 0; }
+[data-dir="notion"] .rows::after {
+  content: "+ New";
+  display: block; padding: 9px 8px;
+  font-size: 13px; color: var(--n-ink-3);
+  border-bottom: 1px solid var(--n-rule);
+}
+[data-dir="notion"] .row {
+  grid-template-columns: 40px minmax(0,1fr) 118px 118px 1fr;
+  border-bottom: 1px solid var(--n-rule);
+  position: relative;
+  animation: n-in .18s ease both;
+}
+@keyframes n-in { from { opacity: 0; transform: translateY(-2px); } }
+[data-dir="notion"] .row:hover { background: var(--n-hover); }
+/* the drag handle Notion reveals on row hover */
+[data-dir="notion"] .row::before {
+  content: "\2834";
+  position: absolute; left: -20px; top: 50%; transform: translateY(-50%);
+  font-size: 13px; color: var(--n-ink-3);
+  opacity: 0; transition: opacity .12s;
+}
+[data-dir="notion"] .row:hover::before { opacity: 1; }
+[data-dir="notion"] .row > * {
+  display: flex; align-items: center;
+  min-height: 37px; padding: 7px 8px;
+  border-left: 1px solid var(--n-rule);
+}
+[data-dir="notion"] .row > *:first-child { border-left: none; }
+[data-dir="notion"] .row-idx { color: var(--n-ink-3); font-size: 13px; }
+[data-dir="notion"] .row-entry { display: flex; align-items: center; gap: 9px; }
+[data-dir="notion"] .row-party {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--n-ink-2);
+  letter-spacing: 0; text-transform: none;
+}
+[data-dir="notion"] .row-party::before {
+  content: ""; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--n-gray-bg); flex: none;
+}
+[data-dir="notion"] .row[data-by="you"] .row-party { color: var(--n-ink); }
+[data-dir="notion"] .row[data-by="you"] .row-party::before { background: var(--n-blue); }
+[data-dir="notion"] .row-digits {
+  gap: 0; padding: 1px 7px; border-radius: 3px;
+  background: var(--n-code-bg);
+  font-family: var(--n-mono); font-size: 14px; letter-spacing: .16em;
+}
+[data-dir="notion"] .row-digits span { padding: 0; }
+[data-dir="notion"] .row-digits span:last-child { margin-right: -.16em; }
+[data-dir="notion"] .row-redact {
+  padding: 2px 8px; border-radius: 3px; font-size: 13px;
+  background: var(--n-gray-bg); color: var(--n-ink-2);
+}
+[data-dir="notion"] .row-redact::before { content: none; }
+[data-dir="notion"] .row-marks, [data-dir="notion"] .row-text { display: none; }
+[data-dir="notion"] .row-bulls .tag, [data-dir="notion"] .row-cows .tag {
+  padding: 2px 8px; border-radius: 3px; font-size: 13px; line-height: 1.35;
+}
+[data-dir="notion"] .row-bulls .tag { background: var(--n-green-bg); color: var(--n-green-ink); }
+[data-dir="notion"] .row-cows .tag { background: var(--n-yellow-bg); color: var(--n-yellow-ink); }
+[data-dir="notion"] .row-bulls[data-z="1"] .tag,
+[data-dir="notion"] .row-cows[data-z="1"] .tag {
+  background: none; color: var(--n-ink-3); padding-left: 0;
+}
+[data-dir="notion"] .row-count { gap: 10px; font-size: 13px; color: var(--n-ink-2); }
+[data-dir="notion"] .spark {
+  flex: 1; min-width: 34px; height: 6px;
+  border-radius: 3px; background: var(--n-rule);
+  position: relative; overflow: hidden;
+}
+[data-dir="notion"] .spark i { position: absolute; inset: 0 auto 0 0; background: var(--n-blue); border-radius: 3px; }
+[data-dir="notion"] .row-count b { font-weight: 400; min-width: 44px; text-align: right; color: var(--n-ink); }
+
+/* ── right column: a callout block and a multi-select property ── */
+[data-dir="notion"] .readout {
+  padding: 2px 60px 24px 0;
+  display: flex; flex-direction: column; gap: 24px;
+}
+[data-dir="notion"] .readout > div:first-child {
+  position: relative;
+  background: var(--n-blue-soft);
+  border-radius: 4px;
+  padding: 15px 16px 16px 46px;
+}
+[data-dir="notion"] .ro-icon { position: absolute; left: 15px; top: 16px; color: var(--n-blue-tag); }
+[data-dir="notion"] .ro-icon svg { width: 17px; height: 17px; display: block; }
+[data-dir="notion"] .ro-label {
+  font-size: 12px; font-weight: 500; color: var(--n-ink-2);
+  letter-spacing: 0; text-transform: none; margin-bottom: 8px;
+}
+[data-dir="notion"] .ro-big { font-size: 30px; font-weight: 600; letter-spacing: -.02em; line-height: 1.15; }
+[data-dir="notion"] .ro-sub { font-size: 13px; color: var(--n-ink-2); margin-top: 3px; }
+[data-dir="notion"] .gauge { height: 6px; border-radius: 3px; margin-top: 14px; background: rgba(55,53,47,.13); }
+[data-dir="notion"] .gauge-fill { inset: 0 auto 0 0; background: var(--n-blue); border-radius: 3px; transition: width .3s ease; }
+[data-dir="notion"] .ticks { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: var(--n-ink-3); }
+[data-dir="notion"] .tracker { gap: 6px; flex-wrap: wrap; border: 0; }
+[data-dir="notion"] .tracker b {
+  min-width: 31px; height: 26px; padding: 0 8px;
+  border: 0; border-radius: 3px;
+  background: var(--n-gray-bg); color: var(--n-gray-ink);
+  font-family: var(--n-mono); font-size: 13px; font-weight: 400;
+}
+[data-dir="notion"] .tracker b[data-s="locked"] { background: var(--n-blue-bg); color: var(--n-blue-tag); font-weight: 600; }
+[data-dir="notion"] .tracker b[data-s="struck"] {
+  background: none; color: var(--n-ink-3);
+  text-decoration: line-through; text-decoration-thickness: 1px;
+}
+[data-dir="notion"] .legend { font-size: 13px; line-height: 1.6; color: var(--n-ink-2); margin-top: 12px; }
+
+/* ── the new-row block ─────────────────────────────────────────── */
+[data-dir="notion"] .console {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 20px 46px 4px 72px;
+}
+[data-dir="notion"] .entry { gap: 6px; }
+[data-dir="notion"] .cell {
+  width: 38px; height: 38px; border-radius: 4px;
+  background: var(--n-code-bg);
+  font-family: var(--n-mono); font-size: 18px; color: var(--n-ink);
+}
+[data-dir="notion"] .cell:empty::after { content: ""; }
+[data-dir="notion"] .cell[data-active="1"] {
+  background: rgba(35,131,226,.09);
+  box-shadow: inset 0 0 0 2px var(--n-blue);
+}
+[data-dir="notion"] .pad { grid-template-columns: repeat(11, auto); gap: 4px; }
+[data-dir="notion"] .key {
+  width: 32px; height: 32px; border-radius: 4px;
+  border: 1px solid var(--n-rule); background: var(--n-page);
+  font-family: var(--n-mono); font-size: 14px; color: var(--n-ink);
+  box-shadow: 0 1px 2px rgba(15,15,15,.05);
+  transition: background .12s;
+}
+[data-dir="notion"] .key:hover:not(:disabled) { background: var(--n-rail); }
+[data-dir="notion"] .key:disabled { background: #fbfbfa; color: var(--n-ink-3); box-shadow: none; }
+[data-dir="notion"] .key[data-k="del"] {
+  width: auto; padding: 0 11px;
+  font-family: var(--n-sans); font-size: 13px; font-weight: 500;
+  letter-spacing: 0; text-transform: none; color: var(--n-ink-2);
+}
+[data-dir="notion"] .acts { gap: 8px; margin-left: auto; border: 0; }
+[data-dir="notion"] .act {
+  padding: 7px 14px; border-radius: 4px;
+  border: 1px solid var(--n-rule); background: var(--n-page);
+  font-size: 14px; font-weight: 500; color: var(--n-ink);
+  letter-spacing: 0; text-transform: none;
+  box-shadow: 0 1px 2px rgba(15,15,15,.05);
+  transition: background .12s;
+}
+[data-dir="notion"] .act small {
+  display: inline; margin: 0 0 0 7px;
+  font-size: 12px; font-weight: 400; letter-spacing: 0;
+  color: var(--n-ink-3); opacity: 1;
+}
+[data-dir="notion"] .act:hover:not(:disabled) { background: var(--n-rail); }
+[data-dir="notion"] .act[data-a="probe"] {
+  background: var(--n-blue); border-color: var(--n-blue); color: #fff;
+  box-shadow: 0 1px 2px rgba(15,15,15,.1);
+}
+[data-dir="notion"] .act[data-a="probe"]:hover:not(:disabled) { background: var(--n-blue-hi); }
+[data-dir="notion"] .act:disabled { opacity: .45; box-shadow: none; }
+
+[data-dir="notion"] .statusbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+  padding: 14px 60px 90px 72px;
+  font-size: 12px; color: var(--n-ink-3);
+  letter-spacing: 0; text-transform: none; border: 0;
+}
+[data-dir="notion"] .st-turn { display: flex; align-items: center; gap: 7px; color: var(--n-ink-2); }
+[data-dir="notion"] .st-turn::before {
+  content: ""; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--n-blue); flex: none;
+}
+
+/* ── rules and result open as a page in a modal ────────────────── */
+[data-dir="notion"] .overlay { background: rgba(15,15,15,.3); }
+[data-dir="notion"] .sheet {
+  max-width: 660px; width: 100%;
+  background: var(--n-page); border: 0; border-radius: 8px;
+  box-shadow: 0 0 0 1px rgba(15,15,15,.05), 0 16px 32px -8px rgba(15,15,15,.2), 0 2px 8px rgba(15,15,15,.08);
+  padding: 44px 64px 50px;
+  color: var(--n-ink); font-family: var(--n-sans);
+}
+[data-dir="notion"] .sheet h2 {
+  font-size: 32px; font-weight: 700; letter-spacing: -.022em;
+  margin: 0 0 16px; text-transform: none;
+}
+[data-dir="notion"] .sheet h2 + * { border: 0; padding-top: 0; }
+[data-dir="notion"] .sheet h3 {
+  font-size: 19px; font-weight: 600; letter-spacing: -.012em;
+  color: var(--n-ink); text-transform: none;
+  margin: 26px 0 6px; padding: 0; border: 0;
+}
+[data-dir="notion"] .sheet p { font-size: 16px; line-height: 1.58; margin: 0 0 8px; color: var(--n-ink); }
+[data-dir="notion"] .sheet em {
+  font-style: normal; font-weight: 400;
+  font-family: var(--n-mono); font-size: 14px;
+  background: var(--n-code-bg); color: var(--n-code-ink);
+  padding: 2px 5px; border-radius: 3px;
+}
+[data-dir="notion"] .sheet .close {
+  margin-top: 30px; padding: 8px 16px; border-radius: 4px;
+  background: var(--n-blue); color: #fff;
+  font-size: 14px; font-weight: 500; letter-spacing: 0; text-transform: none;
+}
+[data-dir="notion"] .sheet .close:hover { background: var(--n-blue-hi); }
+
+@media (max-width: 1180px) {
+  [data-dir="notion"] .stage {
+    grid-template-columns: 248px minmax(0,1fr);
+    grid-template-areas: "nav m" "nav r" "nav l" "nav c" "nav s";
+  }
+  [data-dir="notion"] .readout {
+    flex-direction: row; align-items: flex-start; gap: 28px;
+    padding: 0 60px 22px 72px;
+  }
+  [data-dir="notion"] .readout > div { flex: 1 1 0; }
+}
+@media (max-width: 820px) {
+  [data-dir="notion"] .stage {
+    grid-template-columns: minmax(0,1fr);
+    grid-template-areas: "m" "r" "l" "c" "s";
+  }
+  [data-dir="notion"] .ornament { display: none; }
+  [data-dir="notion"] .masthead,
+  [data-dir="notion"] .readout,
+  [data-dir="notion"] .ledger,
+  [data-dir="notion"] .console,
+  [data-dir="notion"] .statusbar { padding-left: 20px; padding-right: 20px; }
+  [data-dir="notion"] .readout { flex-direction: column; gap: 22px; }
+  [data-dir="notion"] .ledger-label,
+  [data-dir="notion"] .row { grid-template-columns: 30px minmax(0,1fr) 92px 92px; }
+  [data-dir="notion"] .ledger-label .cd, [data-dir="notion"] .row-count { display: none; }
+  [data-dir="notion"] .row::before { display: none; }
+  [data-dir="notion"] .mark { font-size: 30px; }
+  [data-dir="notion"] .page-icon { width: 56px; height: 56px; padding: 12px; }
+  [data-dir="notion"] .console { gap: 12px; }
+  [data-dir="notion"] .pad { grid-template-columns: repeat(6, auto); justify-content: start; }
+  [data-dir="notion"] .acts { margin-left: 0; }
+  [data-dir="notion"] .sheet { padding: 30px 24px 34px; }
+  [data-dir="notion"] .sheet h2 { font-size: 26px; }
+}
+
+/* result banner, skinned lightly per direction */
+.result { text-align: center; }
+.result-head { font-weight: inherit; }
+[data-dir="obsidian"] .result-head { font-family:'Archivo',sans-serif; font-size: 13px; font-weight: 600; letter-spacing:.3em; text-transform: uppercase; color: var(--amber); }
+[data-dir="dossier"] .result-head { font-family:'Oswald',sans-serif; font-size: 24px; font-weight: 600; letter-spacing:.2em; text-transform: uppercase; color: var(--oxblood); }
+[data-dir="orrery"] .result-head { font-family:'Cinzel',serif; font-size: 16px; letter-spacing:.38em; text-transform: uppercase; color: var(--brass-hi); }
+[data-dir="ledger"] .result-head { font-size: 20px; font-weight: 700; color: var(--marine); }
+[data-dir="notion"] .result { text-align: left; }
+[data-dir="notion"] .result-head { font-size: 30px; font-weight: 700; letter-spacing: -.022em; color: var(--n-ink); }
+</style>
+</head>
+<body data-dir="notion">
+
+<div class="stage" id="stage"></div>
+
+<div class="overlay" id="overlay" hidden></div>
+
+<nav class="switcher" aria-label="Mode and art direction">
+  <button type="button" data-mode="solo" aria-pressed="true">Solo</button>
+  <button type="button" data-mode="duel" aria-pressed="false">Duel</button>
+  <span class="sep"></span>
+  <button type="button" data-set="notion" aria-pressed="true">Notion</button>
+  <button type="button" data-set="obsidian" aria-pressed="false">Obsidian</button>
+  <button type="button" data-set="dossier" aria-pressed="false">Dossier</button>
+  <button type="button" data-set="orrery" aria-pressed="false">Orrery</button>
+  <button type="button" data-set="ledger" aria-pressed="false">Ledger</button>
+  <span class="sep"></span>
+  <button type="button" id="btn-rules">Rules</button>
+  <button type="button" id="btn-new">New match</button>
+</nav>
+
+<script>
+(() => {
+'use strict';
+
+/* ═══════════════════════════════════════════════════════════════
+   ENGINE — one authoritative game, five presentations
+   ═══════════════════════════════════════════════════════════════ */
+
+const LEN = 4;
+const DIGITS = [0,1,2,3,4,5,6,7,8,9];
+
+// Every legal code: 4 distinct digits, leading zero allowed → 5040
+const UNIVERSE = (() => {
+  const out = [];
+  for (const a of DIGITS)
+    for (const b of DIGITS) { if (b === a) continue;
+      for (const c of DIGITS) { if (c === a || c === b) continue;
+        for (const d of DIGITS) { if (d === a || d === b || d === c) continue;
+          out.push([a,b,c,d]);
+        } } }
+  return out;
+})();
+
+function scoreGuess(guess, code) {
+  let bulls = 0, cows = 0;
+  for (let i = 0; i < LEN; i++) {
+    if (guess[i] === code[i]) bulls++;               // right digit, right place
+    else if (code.indexOf(guess[i]) !== -1) cows++;  // right digit, wrong place
+  }
+  return { bulls, cows };
+}
+
+function agrees(candidate, entry) {
+  const s = scoreGuess(entry.guess, candidate);
+  return s.bulls === entry.bulls && s.cows === entry.cows;
+}
+
+/** Entries a given party is entitled to see. */
+function visibleTo(party, ledger) {
+  return ledger.filter(e => !e.sealed || e.by === party);
+}
+
+function narrow(entries) {
+  let pool = UNIVERSE;
+  for (const e of entries) pool = pool.filter(c => agrees(c, e));
+  return pool;
+}
+
+/** live = still possible · locked = in every candidate · struck = in none */
+function digitStates(pool) {
+  const hits = new Array(10).fill(0);
+  for (const cand of pool) for (const d of cand) hits[d]++;
+  return DIGITS.map(d =>
+    hits[d] === 0 ? 'struck' : hits[d] === pool.length ? 'locked' : 'live'
+  );
+}
+
+/** A field of 5,040 collapses fast; a linear bar dies after two probes. */
+function logScale(n) {
+  if (n <= 1) return 1.5;
+  return Math.max(1.5, 100 * Math.log(n) / Math.log(UNIVERSE.length));
+}
+
+const WORDS = ['no','one','two','three','four','five','six','seven','eight','nine','ten'];
+const ROMAN = ['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX',
+               'X', 'XI', 'XII', 'XIII', 'XIV', 'XV'];
+
+/* ═══════════════════════════════════════════════════════════════
+   STATE
+   ═══════════════════════════════════════════════════════════════ */
+
+const SEALS = 2;
+let S;
+
+function newMatch(mode) {
+  S = {
+    mode: mode || (S && S.mode) || 'duel',
+    code: UNIVERSE[Math.floor(Math.random() * UNIVERSE.length)],
+    ledger: [],
+    turn: 'you',
+    seals: { you: SEALS, them: SEALS },
+    skip: { you: false, them: false },
+    winner: null,
+    input: [],
+    busy: false,
+  };
+}
+
+/** After a party acts: the opponent plays unless they owe a skipped turn. */
+function passTurn(actor) {
+  const other = actor === 'you' ? 'them' : 'you';
+  if (S.skip[other]) { S.skip[other] = false; S.turn = actor; }
+  else S.turn = other;
+}
+
+function submit(party, guess, kind) {
+  const { bulls, cows } = scoreGuess(guess, S.code);
+
+  // Solo: no opponent, no turn to lose, no reason to hide a guess.
+  // Four bulls ends it.
+  if (S.mode === 'solo') {
+    S.ledger.push({ by: 'you', guess: guess.slice(), bulls, cows, kind: 'probe', sealed: false });
+    if (bulls === LEN) { S.winner = 'you'; S.turn = null; }
+    return;
+  }
+
+  const sealed = kind === 'seal';
+  S.ledger.push({ by: party, guess: guess.slice(), bulls, cows, kind, sealed });
+  if (sealed) S.seals[party]--;
+
+  // Only a commit can win. A probe that happens to be right just
+  // publishes the answer — and hands the next turn to your opponent.
+  if (kind === 'commit') {
+    if (bulls === LEN) { S.winner = party; S.turn = null; return; }
+    S.skip[party] = true;
+  }
+  passTurn(party);
+}
+
+/* The opponent. Reasons only from what it is entitled to see. */
+function opponentMove() {
+  const pool = narrow(visibleTo('them', S.ledger));
+  if (!pool.length) { passTurn('them'); return; }
+
+  if (pool.length === 1) { submit('them', pool[0], 'commit'); return; }
+  if (pool.length <= 3 && Math.random() < 0.55) {
+    submit('them', pool[Math.floor(Math.random() * pool.length)], 'commit');
+    return;
+  }
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  const wantsCover = S.seals.them > 0 && pool.length > 80 && Math.random() < 0.4;
+  submit('them', pick, wantsCover ? 'seal' : 'probe');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   VIEW
+   ═══════════════════════════════════════════════════════════════ */
+
+const stage = document.getElementById('stage');
+const overlay = document.getElementById('overlay');
+
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+function dir() { return document.body.dataset.dir; }
+
+/**
+ * A bull is a correct digit in its correct place.
+ * A cow is a correct digit in the wrong place.
+ * Every skin says the same two words; only the register changes.
+ */
+function tally(bulls, cows, spellOut) {
+  const n = v => spellOut ? (WORDS[v] != null ? WORDS[v] : v) : v;
+  const parts = [];
+  if (bulls) parts.push(`${n(bulls)} ${bulls === 1 ? 'bull' : 'bulls'}`);
+  if (cows) parts.push(`${n(cows)} ${cows === 1 ? 'cow' : 'cows'}`);
+  if (parts.length) return parts.join(' · ');
+  return spellOut ? 'no bulls, no cows' : 'no bulls · no cows';
+}
+
+function phrase(bulls, cows) {
+  const d = dir();
+  if (d === 'orrery') return tally(bulls, cows, true);
+  if (d === 'dossier' && bulls === LEN) return 'four bulls · code broken';
+  return tally(bulls, cows, false);
+}
+
+function ordinal(i) {
+  const n = i + 1;
+  const d = dir();
+  if (d === 'orrery') return ROMAN[n] || String(n);
+  if (d === 'dossier') return 'No. ' + n;
+  return String(n).padStart(2, '0');
+}
+
+/** Glyphs for the Notion sidebar — Notion's own line weight, no emoji. */
+const GLYPH = {
+  search: '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="7" cy="7" r="4.3"/><path d="M10.3 10.3 14 14" stroke-linecap="round"/></svg>',
+  home: '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2.6 7 8 2.6 13.4 7v6.6H2.6z" stroke-linejoin="round"/></svg>',
+  page: '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M3.6 1.9h5.2l3.6 3.6v8.6H3.6z" stroke-linejoin="round"/><path d="M8.6 2v3.6h3.6M5.8 8.4h4.4M5.8 10.9h4.4" stroke-linecap="round"/></svg>',
+};
+
+function sidebar() {
+  const solo = S.mode === 'solo';
+  const page = (label, attr, on) =>
+    `<button class="nav-item" type="button" ${attr}${on ? ' aria-current="page"' : ''}>`
+    + `<span class="nav-chev">\u25B8</span>${GLYPH.page}${label}</button>`;
+  return `
+    <div class="ws"><div class="ws-badge">N</div><div class="ws-name">Nocturne</div><div class="ws-chev">\u2304</div></div>
+    <div class="nav-item">${GLYPH.search}Search</div>
+    <div class="nav-item">${GLYPH.home}Home</div>
+    <div class="nav-sec">Private</div>
+    ${page('Solo game', 'data-nav-mode="solo"', solo)}
+    ${page('Duel', 'data-nav-mode="duel"', !solo)}
+    ${page('Rules', 'data-nav-rules="1"', false)}
+    <div class="nav-new">+ New page</div>`;
+}
+
+function ornament() {
+  const o = el('div', 'ornament');
+  if (dir() === 'notion') {
+    // In this skin the ornament is the workspace sidebar, and it works.
+    o.innerHTML = sidebar();
+    return o;
+  }
+  if (dir() === 'orrery') {
+    const stars = Array.from({ length: 70 }, () => {
+      const x = Math.random() * 1180, y = Math.random() * 1180;
+      const r = Math.random() * 1.1 + .3;
+      return `<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${r.toFixed(2)}" opacity="${(Math.random()*.5+.12).toFixed(2)}"/>`;
+    }).join('');
+    o.innerHTML = `<svg viewBox="0 0 1180 1180" aria-hidden="true">
+      <g class="stars">${stars}</g>
+      <ellipse class="ring r1" cx="590" cy="590" rx="430" ry="148" stroke-width="1"/>
+      <ellipse class="ring r2" cx="590" cy="590" rx="330" ry="330" stroke-width="1" stroke-dasharray="2 10"/>
+      <ellipse class="ring r3" cx="590" cy="590" rx="520" ry="236" stroke-width="1"/>
+      <circle class="ring" cx="590" cy="590" r="196" stroke-width="1"/>
+    </svg>`;
+  }
+  return o;
+}
+
+function masthead(pool) {
+  const h = el('header', 'masthead');
+  const notion = dir() === 'notion';
+  const solo = S.mode === 'solo';
+
+  if (notion) {
+    // Notion's topbar: breadcrumb left, page actions right.
+    const crumb = el('div', 'crumb');
+    crumb.append(el('span', null, 'Nocturne'));
+    crumb.append(el('span', 'crumb-sep', '/'));
+    crumb.append(el('span', null, solo ? 'Solo game' : 'Duel'));
+    const right = el('div', 'crumb-right');
+    right.append(el('span', null, 'Share'));
+    right.append(el('span', null, 'Edited just now'));
+    crumb.append(right);
+    h.append(crumb);
+  }
+
+  const left = el('div');
+  if (notion) {
+    // Page icon: one bull, one cow, two misses.
+    const ic = el('div', 'page-icon');
+    for (let i = 0; i < 4; i++) ic.append(el('i'));
+    left.append(ic);
+  }
+  left.append(el('div', 'mark', notion ? (solo ? 'Solo game' : 'Duel') : 'Nocturne'));
+  left.append(el('div', 'tagline',
+    solo
+      ? (dir() === 'orrery'
+          ? 'One hidden number, and only your own reading of it'
+          : notion
+            ? 'The computer is holding a four-digit code and every digit is different. Log a guess, read the bulls and cows that come back, and work it out.'
+            : 'One hidden code · no opponent · no clock')
+      : (dir() === 'orrery'
+          ? 'A shared reckoning of one hidden number'
+          : notion
+            ? 'You and one other player are cracking the same four-digit code. Every public guess lands in the table below, where you both read it.'
+            : 'One code · two readers · one public ledger')));
+  h.append(left);
+
+  const meta = el('div', 'meta');
+  const turnNo = Math.floor(S.ledger.length / 2) + 1;
+  const items = solo
+    ? [
+        ['Guess', String(S.ledger.length + (S.winner ? 0 : 1))],
+        ['Narrowed to', String(pool.length)],
+      ]
+    : [
+        ['Turn', dir() === 'orrery' ? (ROMAN[Math.min(turnNo,4)] || turnNo) : String(turnNo)],
+        ['Entries', String(S.ledger.length)],
+        ['Narrowed to', String(pool.length)],
+      ];
+  // Notion pages carry properties, and a Status select is the first one anybody adds.
+  if (notion) items.push(['Status', S.winner ? 'Solved' : 'In progress', 'tag']);
+  for (const [k, v, kind] of items) {
+    const d = el('div');
+    d.dataset.v = v;
+    if (kind) d.dataset.kind = kind;
+    d.append(el('i', null, k));
+    d.append(el('b', null, v));
+    meta.append(d);
+  }
+  h.append(meta);
+  return h;
+}
+
+function ledgerPanel() {
+  const sec = el('section', 'ledger');
+  const notion = dir() === 'notion';
+  // Obsidian, Dossier and Orrery read as a feed; Ledger and Notion read as a table.
+  const table = notion || dir() === 'ledger';
+
+  if (table) {
+    const head = el('div', 'ledger-label');
+    const cols = notion
+      ? [['num',''], ['en','Guess'], ['ex','Bulls'], ['nr','Cows'], ['cd','Field']]
+      : [['num','#'], ['en','Entry'], ['ex','Bulls'], ['nr','Cows'], ['cd','Field remaining']];
+    for (const [c, t] of cols) head.append(el('span', c, t));
+    sec.append(head);
+  } else {
+    sec.append(el('div', 'ledger-label',
+      S.mode === 'solo'
+        ? (dir() === 'orrery' ? 'What you have read'
+           : dir() === 'dossier' ? 'Working log'
+           : 'Your guesses')
+        : (dir() === 'orrery' ? 'The reckoning so far'
+           : dir() === 'dossier' ? 'Transmission log'
+           : 'Shared ledger')));
+  }
+
+  const rows = el('div', 'rows');
+  if (!S.ledger.length) {
+    const empty = el('div', 'legend',
+      dir() === 'orrery' ? 'Nothing has been read yet. Set four digits and send.'
+      : dir() === 'dossier' ? 'No transmissions on file. Enter four digits and send.'
+      : notion ? (S.mode === 'solo'
+          ? 'Nothing logged yet. Enter four digits below and log your first guess.'
+          : 'Nothing logged yet. Enter four digits below and probe.')
+      : S.mode === 'solo' ? 'No guesses yet. Enter four digits and guess.'
+      : 'No entries yet. Enter four digits and probe.');
+    empty.style.padding = '18px 14px';
+    rows.append(empty);
+  }
+
+  // Candidate field after each successive entry, from your seat
+  const seen = [];
+  const counts = S.ledger.map(e => {
+    if (!e.sealed || e.by === 'you') seen.push(e);
+    return narrow(seen).length;
+  });
+
+  S.ledger.forEach((e, i) => {
+    const hidden = e.sealed && e.by === 'them';
+    const row = el('div', 'row');
+    row.dataset.by = e.by;
+    row.dataset.kind = e.kind;
+    if (e.sealed) row.dataset.sealed = '1';
+
+    if (table) row.append(el('div', 'row-idx', String(i + 1)));
+
+    const solo = S.mode === 'solo';
+    const whoText = solo ? ordinal(i) : (e.by === 'you' ? 'You' : 'Opponent');
+    const label = solo ? ''
+                : e.kind === 'commit' ? ' · commit'
+                : (e.sealed && !hidden) ? ' · sealed' : '';
+
+    if (table) {
+      const entryCell = el('div', 'row-entry');
+      // The table already numbers its own rows.
+      if (!solo) entryCell.append(el('span', 'row-party', whoText + label));
+      if (hidden) entryCell.append(el('div', 'row-redact', 'Sealed'));
+      else {
+        const digs = el('div', 'row-digits');
+        for (const d of e.guess) digs.append(el('span', null, String(d)));
+        entryCell.append(digs);
+      }
+      row.append(entryCell);
+
+      // Notion renders these two as select tags, so they carry the words.
+      const word = (n, one, many) => n ? `${n} ${n === 1 ? one : many}` : `no ${many}`;
+      const blank = notion ? '' : '·';
+      const ex = el('div', 'row-bulls');
+      ex.append(el('span', 'tag',
+        hidden ? blank : notion ? word(e.bulls, 'bull', 'bulls') : String(e.bulls)));
+      if (!hidden && !e.bulls) ex.dataset.z = '1';
+      const nr = el('div', 'row-cows');
+      nr.append(el('span', 'tag',
+        hidden ? blank : notion ? word(e.cows, 'cow', 'cows') : String(e.cows)));
+      if (!hidden && !e.cows) nr.dataset.z = '1';
+      row.append(ex, nr);
+
+      const cd = el('div', 'row-count');
+      const spark = el('div', 'spark');
+      const bar = el('i');
+        bar.style.width = logScale(counts[i]) + '%';
+      spark.append(bar);
+      cd.append(spark);
+      cd.append(el('b', null, counts[i].toLocaleString('en-US')));
+      row.append(cd);
+      rows.append(row);
+      return;
+    }
+
+    row.append(el('div', 'row-who', whoText + label));
+
+    if (hidden) {
+      row.append(el('div', 'row-redact',
+        dir() === 'dossier' ? 'Redacted' : 'Sealed'));
+      row.append(el('div', 'row-marks'));
+    } else {
+      const digs = el('div', 'row-digits');
+      for (const d of e.guess) digs.append(el('span', null, String(d)));
+      row.append(digs);
+
+      const marks = el('div', 'row-marks');
+      const seq = [
+        ...Array(e.bulls).fill('bull'),
+        ...Array(e.cows).fill('cow'),
+        ...Array(LEN - e.bulls - e.cows).fill('miss'),
+      ];
+      for (const m of seq) {
+        const b = el('div', 'mk');
+        b.dataset.m = m;
+        marks.append(b);
+      }
+      row.append(marks);
+      row.append(el('div', 'row-text', phrase(e.bulls, e.cows)));
+    }
+    rows.append(row);
+  });
+
+  sec.append(rows);
+  return sec;
+}
+
+function readoutPanel(pool) {
+  const sec = el('aside', 'readout');
+  const states = digitStates(pool);
+
+  const a = el('div');
+  if (dir() === 'notion') {
+    const ico = el('div', 'ro-icon');
+    ico.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h12M4 8h8M6.5 12h3"/></svg>';
+    a.append(ico);
+  }
+  a.append(el('div', 'ro-label',
+    dir() === 'orrery' ? 'What remains' : 'Field remaining'));
+  if (dir() === 'orrery') {
+    a.append(el('div', 'ro-big',
+      pool.length === 1 ? 'A single number remains. Name it.'
+      : `${pool.length.toLocaleString('en-US')} numbers still answer to everything read so far.`));
+  } else {
+    a.append(el('div', 'ro-big', pool.length.toLocaleString('en-US')));
+    a.append(el('div', 'ro-sub', `of ${UNIVERSE.length.toLocaleString('en-US')} possible codes`));
+    const g = el('div', 'gauge');
+    const f = el('div', 'gauge-fill');
+    f.style.width = logScale(pool.length) + '%';
+    g.append(f);
+    a.append(g);
+    const t = el('div', 'ticks');
+    t.append(el('span', null, '1'));
+    t.append(el('span', null, UNIVERSE.length.toLocaleString('en-US')));
+    a.append(t);
+  }
+  sec.append(a);
+
+  const b = el('div');
+  b.append(el('div', 'ro-label', 'Digits'));
+  const tr = el('div', 'tracker');
+  DIGITS.forEach((d, i) => {
+    const n = el('b', null, String(d));
+    n.dataset.s = states[i];
+    tr.append(n);
+  });
+  b.append(tr);
+  const locked = states.filter(s => s === 'locked').length;
+  const struck = states.filter(s => s === 'struck').length;
+  b.append(el('div', 'legend',
+    dir() === 'orrery'
+      ? `${WORDS[locked] || locked} proven to belong · ${WORDS[struck] || struck} ruled out entirely.`
+      : dir() === 'notion'
+        ? `${locked} proven to be in the code, ${struck} ruled out.`
+        : `${locked} proven in the code · ${struck} ruled out.`));
+  sec.append(b);
+  return sec;
+}
+
+function consolePanel(pool) {
+  const sec = el('section', 'console');
+  const yourTurn = S.turn === 'you' && !S.winner && !S.busy;
+
+  const entry = el('div', 'entry');
+  for (let i = 0; i < LEN; i++) {
+    const c = el('div', 'cell', S.input[i] != null ? String(S.input[i]) : '');
+    if (i === S.input.length && yourTurn) c.dataset.active = '1';
+    entry.append(c);
+  }
+  sec.append(entry);
+
+  const padWrap = el('div', 'pad');
+  DIGITS.forEach((d, i) => {
+    const k = el('button', 'key', String(d));
+    k.type = 'button';
+    k.dataset.k = String(d);
+    k.disabled = !yourTurn || S.input.includes(d) || S.input.length === LEN;
+    if (dir() === 'orrery') {
+      // lay the ten dials along an arc
+      const t = i / (DIGITS.length - 1);
+      const ang = Math.PI * (1 - t);
+      k.style.left = (50 + Math.cos(ang) * 46) + '%';
+      k.style.top = (100 - Math.sin(ang) * 82) + '%';
+    }
+    padWrap.append(k);
+  });
+  const del = el('button', 'key', 'Clear');
+  del.type = 'button';
+  del.dataset.k = 'del';
+  del.disabled = !S.input.length;
+  if (dir() === 'orrery') {
+    const holder = el('div', 'pad-del');
+    holder.append(del);
+    padWrap.append(holder);
+  } else {
+    padWrap.append(del);
+  }
+  sec.append(padWrap);
+
+  const acts = el('div', 'acts');
+  const ready = S.input.length === LEN;
+  const notion = dir() === 'notion';
+  const defs = S.mode === 'solo'
+    ? [['probe', dir() === 'dossier' ? 'Send' : notion ? 'Log guess' : 'Guess',
+        notion ? '' : `guess ${S.ledger.length + 1}`, true]]
+    : [
+        ['probe', dir() === 'dossier' ? 'Send' : 'Probe', notion ? '' : 'public', true],
+        ['seal', dir() === 'dossier' ? 'Send sealed' : 'Seal', `${S.seals.you} left`, S.seals.you > 0],
+        ['commit', dir() === 'dossier' ? 'Declare' : 'Commit', notion ? '' : 'costs a turn if wrong', true],
+      ];
+  for (const [a, label, note, allowed] of defs) {
+    const btn = el('button', 'act');
+    btn.type = 'button';
+    btn.dataset.a = a;
+    btn.append(document.createTextNode(label));
+    btn.append(el('small', null, note));
+    btn.disabled = !yourTurn || !ready || !allowed;
+    acts.append(btn);
+  }
+  sec.append(acts);
+  return sec;
+}
+
+function statusBar() {
+  const f = el('footer', 'statusbar');
+
+  if (S.mode === 'solo') {
+    const n = S.ledger.length;
+    const plural = n === 1 ? 'guess' : 'guesses';
+    f.append(el('div', 'st-turn',
+      S.winner ? `Code broken in ${n} ${plural}` : 'Your move'));
+    f.append(el('div', null, dir() === 'notion'
+      ? `Count ${n}`
+      : n ? `${n} ${plural} so far` : 'No guesses yet'));
+    return f;
+  }
+
+  let msg;
+  if (S.winner) {
+    msg = S.winner === 'you' ? 'You broke the code' : 'Your opponent broke it first';
+  } else if (S.busy) {
+    msg = dir() === 'dossier' ? 'Opponent is transmitting' : 'Opponent is reading';
+  } else if (S.skip.you && S.turn === 'them') {
+    msg = 'Opponent plays twice — your commit missed';
+  } else {
+    msg = S.turn === 'you' ? 'Your move' : "Opponent's move";
+  }
+  f.append(el('div', 'st-turn', msg));
+  f.append(el('div', null, dir() === 'notion'
+    ? `Count ${S.ledger.length} · seals: you ${S.seals.you}, opponent ${S.seals.them}`
+    : `Seals — you ${S.seals.you} · opponent ${S.seals.them}`));
+  return f;
+}
+
+function render() {
+  const pool = narrow(visibleTo('you', S.ledger));
+  stage.dataset.dir = dir();
+  document.body.dataset.mode = S.mode;
+  stage.replaceChildren(
+    ornament(),
+    masthead(pool),
+    ledgerPanel(),
+    readoutPanel(pool),
+    consolePanel(pool),
+    statusBar(),
+  );
+  if (S.winner) showResult();
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   INTERACTION
+   ═══════════════════════════════════════════════════════════════ */
+
+function tapDigit(d) {
+  if (S.turn !== 'you' || S.winner || S.busy) return;
+  if (S.input.length >= LEN || S.input.includes(d)) return;
+  S.input.push(d);
+  render();
+}
+
+function backspace() {
+  if (!S.input.length) return;
+  S.input.pop();
+  render();
+}
+
+function act(kind) {
+  if (S.turn !== 'you' || S.winner || S.busy) return;
+  if (S.input.length !== LEN) return;
+  const guess = S.input.slice();
+  S.input = [];
+  submit('you', guess, S.mode === 'solo' ? 'probe' : kind);
+  if (S.winner || S.mode === 'solo') { render(); return; }
+
+  if (S.turn === 'them') {
+    S.busy = true;
+    render();
+    setTimeout(() => {
+      S.busy = false;
+      opponentMove();
+      // the opponent may be owed a second turn
+      if (S.turn === 'them' && !S.winner) {
+        S.busy = true;
+        render();
+        setTimeout(() => { S.busy = false; opponentMove(); render(); }, 1000);
+        return;
+      }
+      render();
+    }, 1050);
+  } else {
+    render();
+  }
+}
+
+stage.addEventListener('click', e => {
+  // The Notion sidebar is real: its page rows switch mode and open the rules.
+  const nav = e.target.closest('[data-nav-mode]');
+  if (nav) { setMode(nav.dataset.navMode); return; }
+  if (e.target.closest('[data-nav-rules]')) { openOverlay(rulesSheet); return; }
+
+  const key = e.target.closest('.key');
+  if (key) {
+    if (key.dataset.k === 'del') backspace();
+    else tapDigit(Number(key.dataset.k));
+    return;
+  }
+  const a = e.target.closest('.act');
+  if (a) act(a.dataset.a);
+});
+
+document.addEventListener('keydown', e => {
+  if (!overlay.hidden) {
+    if (e.key === 'Escape') closeOverlay();
+    return;
+  }
+  if (e.key >= '0' && e.key <= '9') { tapDigit(Number(e.key)); e.preventDefault(); }
+  else if (e.key === 'Backspace') { backspace(); e.preventDefault(); }
+  else if (e.key === 'Enter') { act(e.shiftKey ? 'commit' : 'probe'); e.preventDefault(); }
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   OVERLAYS
+   ═══════════════════════════════════════════════════════════════ */
+
+function openOverlay(build) {
+  overlay.replaceChildren(build());
+  overlay.hidden = false;
+}
+function closeOverlay() { overlay.hidden = true; }
+
+overlay.addEventListener('click', e => {
+  if (e.target === overlay || e.target.closest('.close')) closeOverlay();
+});
+
+function rulesSheet() {
+  const s = el('div', 'sheet');
+  s.append(el('h2', null, 'How Nocturne is played'));
+  const body = el('div');
+
+  const blocks = S.mode === 'solo' ? [
+    ['One hidden code',
+     'The computer has picked a four-digit number. All four digits differ. You guess, it answers, and you keep going until you read it. There is no opponent and no clock.'],
+    ['Bulls and cows',
+     'Every guess comes back as <em>bulls</em> and <em>cows</em>. A bull is a correct digit in its correct place. A cow is a correct digit sitting somewhere else. Four bulls ends it.'],
+    ['The field',
+     'The panel counts how many of the 5,040 possible codes still fit everything you have been told, and marks each digit as still live, proven to be in the code, or ruled out. Both are worked out from your own guesses, so neither hands you anything you had not already earned.'],
+  ] : [
+    ['One code, one ledger',
+     'You and your opponent are cracking the <em>same</em> hidden four-digit number. All four digits differ. You take turns, and every public guess lands on a ledger you both read.'],
+    ['Probing costs you something',
+     'A probe comes back as <em>bulls</em> and <em>cows</em>. A bull is a correct digit in its correct place. A cow is a correct digit sitting somewhere else. Your opponent reads the same answer you do, so the better your probe, the more you have just handed over.'],
+    ['Sealed probes',
+     'Twice a match you can seal a probe. You see the result; your opponent sees only that you sealed one. They know you learned something. They do not know what — and you may have learned nothing at all.'],
+    ['Only a commit wins',
+     'A probe never wins, even when it comes back four bulls. It publishes the answer and passes the turn. To take the match you must <em>commit</em>. Commit wrong and you forfeit your next turn, and your opponent reads the result either way.'],
+    ['Why this is the whole game',
+     'Every other version of Bulls and Cows runs two players through separate boards against a stopwatch. Here information is the contested resource, and the question each turn is not what to guess but <em>how much to reveal</em>.'],
+  ];
+  for (const [h, p] of blocks) {
+    body.append(el('h3', null, h));
+    const par = el('p');
+    par.innerHTML = p;
+    body.append(par);
+  }
+  const keys = el('p');
+  keys.innerHTML = S.mode === 'solo'
+    ? 'Keyboard: digits to enter, <em>Backspace</em> to clear, <em>Enter</em> to guess.'
+    : 'Keyboard: digits to enter, <em>Backspace</em> to clear, <em>Enter</em> to probe, <em>Shift + Enter</em> to commit.';
+  body.append(el('h3', null, 'Controls'));
+  body.append(keys);
+
+  const close = el('button', 'close', 'Close');
+  close.type = 'button';
+  body.append(close);
+  s.append(body);
+  return s;
+}
+
+function showResult() {
+  openOverlay(() => {
+    const s = el('div', 'sheet result');
+    const solo = S.mode === 'solo';
+    s.append(el('h2', 'result-head',
+      (solo || S.winner === 'you') ? 'Code broken' : 'Beaten to it'));
+    const body = el('div');
+    const p = el('p');
+    const n = S.ledger.length;
+    p.innerHTML = solo
+      ? `You read it in ${n} ${n === 1 ? 'guess' : 'guesses'}. The code was <em>${S.code.join(' ')}</em>.`
+      : S.winner === 'you'
+        ? `You committed the code in ${n} entries. It was <em>${S.code.join(' ')}</em>.`
+        : `Your opponent committed first. The code was <em>${S.code.join(' ')}</em>.`;
+    body.append(p);
+    const p2 = el('p');
+    if (solo) {
+      // How far each guess actually cut the field.
+      const seen = [];
+      const seq = S.ledger.map(e => { seen.push(e); return narrow(seen).length; });
+      // Stop at the point only one code was left; what follows adds nothing.
+      const solved = seq.indexOf(1);
+      const shown = solved === -1 ? seq : seq.slice(0, solved + 1);
+      p2.textContent = 'Field after each guess: '
+        + [UNIVERSE.length, ...shown].map(v => v.toLocaleString('en-US')).join(' → ')
+        + (solved !== -1 && solved + 1 < seq.length
+            ? `, settled at guess ${solved + 1}.` : '.');
+    } else {
+      const yours = S.ledger.filter(e => e.by === 'you').length;
+      p2.textContent = `You placed ${yours} of the ${n} entries on the ledger.`;
+    }
+    body.append(p2);
+    const close = el('button', 'close', 'New match');
+    close.type = 'button';
+    close.addEventListener('click', () => { newMatch(); render(); });
+    body.append(close);
+    s.append(body);
+    return s;
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DIRECTION SWITCH
+   ═══════════════════════════════════════════════════════════════ */
+
+const switcher = document.querySelector('.switcher');
+
+/** One entry point for the mode, because two places now change it. */
+function setMode(mode) {
+  for (const o of switcher.querySelectorAll('button[data-mode]')) {
+    o.setAttribute('aria-pressed', String(o.dataset.mode === mode));
+  }
+  closeOverlay();
+  newMatch(mode);
+  render();
+}
+
+switcher.addEventListener('click', e => {
+  const m = e.target.closest('button[data-mode]');
+  if (m) { setMode(m.dataset.mode); return; }
+  const b = e.target.closest('button[data-set]');
+  if (b) {
+    document.body.dataset.dir = b.dataset.set;
+    for (const o of switcher.querySelectorAll('button[data-set]')) {
+      o.setAttribute('aria-pressed', String(o === b));
+    }
+    closeOverlay();
+    render();
+  }
+});
+document.getElementById('btn-rules').addEventListener('click', () => openOverlay(rulesSheet));
+document.getElementById('btn-new').addEventListener('click', () => {
+  closeOverlay();
+  newMatch();
+  render();
+});
+
+newMatch('solo');
+render();
+})();
+</script>
+</body>
+</html>

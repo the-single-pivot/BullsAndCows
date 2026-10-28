@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bulls &amp; Cows</title>
+<meta name="description" content="Crack a four-digit code. Every digit is different.">
+<meta name="color-scheme" content="light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&family=Instrument+Serif&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="top">
+    <h1 class="wordmark">Bulls &amp; Cows</h1>
+    <div class="top-acts" id="top-acts"></div>
+  </header>
+
+  <div class="feed" id="feed">
+    <div class="primer" id="primer">
+      <h2>Crack the code</h2>
+      <p>Four different digits, 0 to 9. Guess, and every guess comes back scored.</p>
+      <ul>
+        <li><span class="pip" data-m="bull" aria-hidden="true"></span>&nbsp; A <strong>bull</strong> is a digit that is correct and in the right place.</li>
+        <li><span class="pip" data-m="cow" aria-hidden="true"></span>&nbsp; A <strong>cow</strong> is a digit that is correct but in the wrong place.</li>
+        <li>No digit repeats, and the code can start with 0.</li>
+        <li>Four bulls wins. You get ten guesses, then the code is revealed.</li>
+      </ul>
+    </div>
+    <ol class="history" id="history"></ol>
+  </div>
+
+  <p class="legend">
+    <span><span class="pip" data-m="bull" aria-hidden="true"></span>Bull: right digit, right place</span>
+    <span><span class="pip" data-m="cow" aria-hidden="true"></span>Cow: right digit, wrong place</span>
+  </p>
+
+  <section class="board" aria-labelledby="attempt">
+    <div class="board-head">
+      <span class="attempt" id="attempt">Guess 1 of 10</span>
+      <button type="button" class="clock" id="clock" aria-label="Time on this code. Open this session's record.">0:00</button>
+      <button type="button" class="linkish" id="btn-clear" hidden>Clear</button>
+    </div>
+
+    <div class="slots" id="slots" role="group" aria-label="Your guess"></div>
+    <p class="msg" id="msg" role="status"></p>
+
+    <div id="play">
+      <div class="pad" id="pad"></div>
+      <div class="actions">
+        <button type="button" class="btn btn-del" id="btn-del">Delete</button>
+        <button type="button" class="btn btn-primary" id="btn-submit">Submit guess</button>
+      </div>
+    </div>
+
+    <div id="won"></div>
+  </section>
+
+</div>
+
+<div class="scrim" id="scrim" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title">
+    <h2 id="panel-title">How to play</h2>
+    <p>A secret code of four different digits. Guess it. Each guess is scored.</p>
+    <dl>
+      <dt><span class="pip" data-m="bull" aria-hidden="true"></span>Bull</dt>
+      <dd>A digit that is correct and in the correct position.</dd>
+      <dt><span class="pip" data-m="cow" aria-hidden="true"></span>Cow</dt>
+      <dd>A digit that is correct but in the wrong position.</dd>
+    </dl>
+    <div class="example">
+      <b>3 7 1 4</b>
+      If the code is <strong>3 4 1 9</strong>, that scores 2 bulls and 1 cow.
+      The 3 and the 1 are in place, the 4 is in the code but not in that slot,
+      and the 7 is not in the code at all.
+    </div>
+    <ul>
+      <li>The code never repeats a digit, and nor should your guess.</li>
+      <li>It can start with 0.</li>
+      <li>Four bulls wins. You get ten guesses, then the code is revealed.</li>
+      <li>The clock starts on your first digit. Tap it for this session's record.</li>
+      <li>Type on your keyboard, or tap the keypad.</li>
+    </ul>
+
+    <h3>The board keeps nothing for you</h3>
+    <p>The keypad stays blank whatever you learn, and no counter tells you how close you are. Every deduction is yours to make from the scored guesses, and yours to remember. Paper is allowed.</p>
+
+    <button type="button" class="btn btn-primary" id="btn-close">Back to the game</button>
+  </div>
+</div>
+
+<div class="scrim" id="scrim-run" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="run-title">
+    <h2 id="run-title">This session</h2>
+    <p id="run-lead"></p>
+    <ul class="stats" id="run-stats"></ul>
+    <h3 id="run-head">Games</h3>
+    <ol class="games" id="run-games"></ol>
+    <button type="button" class="btn btn-primary" id="btn-run-close">Back to the game</button>
+  </div>
+</div>
+
+<p class="sr" id="live" role="status" aria-live="polite"></p>
+
+<script type="module" src="src/app.js"></script>
+</body>
+</html>
