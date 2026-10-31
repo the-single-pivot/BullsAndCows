@@ -2,6 +2,14 @@
 
 A four-digit code-breaking game for the browser. Ten guesses, a clock, and no help.
 
+[![check](https://github.com/the-single-pivot/BullsAndCows/actions/workflows/ci.yml/badge.svg)](https://github.com/the-single-pivot/BullsAndCows/actions/workflows/ci.yml)
+
+<p align="center">
+  <img src="docs/board.png" width="330" alt="Seven scored guesses stacked above the keypad, the clock running on guess eight of ten">
+  &nbsp;
+  <img src="docs/solved.png" width="330" alt="The end screen: solved in five guesses, one under par, and how many codes were left after each guess">
+</p>
+
 The computer picks a code of four different digits. You guess, and every guess comes
 back scored:
 
@@ -50,6 +58,7 @@ test/                   node:test, no runner to install
 tools/build.mjs         bundles the single-file and artifact versions into dist/
 tools/serve.mjs         the dev server
 design/directions.html  five art directions over one engine, kept as an archive
+docs/                   the screenshots above
 dist/                   generated: run npm run build after changing src/
 ```
 
@@ -68,7 +77,7 @@ vercel        # preview
 vercel --prod
 ```
 
-Or import the repository at vercel.com and keep the defaults.
+Or import `the-single-pivot/BullsAndCows` at vercel.com and keep the defaults.
 
 ## License
 
