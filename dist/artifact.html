@@ -25,6 +25,7 @@
   --accent-hi:    #2a7a62;
   --accent-soft:  #dde9e4;
   --danger:       #8e4426;
+  --mat:          #e3dfd8;   /* the ground a laptop sees around the card */
 
   --r:    10px;
   --r-sm: 7px;
@@ -563,6 +564,68 @@ button:disabled { cursor: not-allowed; }
   .g-digits span { width: 16px; }
   .g-text { font-size: 11.5px; }
   .btn-del { width: 68px; }
+}
+
+/* ── Laptops: two columns, still one screen ────────────────────
+   One 460px column is a phone layout, and on a laptop it reads as
+   a phone propped against the screen. Past 900px the guesses keep
+   the left and the board becomes a rail on the right, so reading
+   and playing sit side by side and the page still never scrolls. */
+
+@media (min-width: 900px) and (min-height: 560px) {
+  /* the app stops short of the edges and sits on the ground as a
+     card, so the space around it reads as a margin, not as a phone
+     screen stretched to the height of a monitor */
+  body { background: var(--mat); min-height: 100dvh; display: flex; }
+
+  .app {
+    margin: auto;
+    height: min(100dvh - 64px, 800px);
+    width: 100%;            /* a flex item sizes to its content without it */
+    max-width: 920px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(26, 26, 24, .04), 0 16px 40px -16px rgba(26, 26, 24, .16);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 380px;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "top    top"
+      "feed   board"
+      "legend board";
+  }
+  .top { grid-area: top; }
+  .feed { grid-area: feed; padding-top: 6px; }
+  .legend { grid-area: legend; }
+  .board { grid-area: board; }
+
+  /* with the room to spare the guesses sit in the middle of their
+     column and grow outward from there, newest still first. On a
+     phone they stay anchored at the bottom, by the thumbs. */
+  .history { margin: auto 0; }
+
+  /* the board stands beside the feed rather than under it. `safe`
+     keeps the top reachable if the rail ever runs out of height. */
+  .board {
+    border-top: none;
+    border-left: 1px solid var(--line);
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    justify-content: safe center;
+    overflow-y: auto;
+  }
+
+  /* a pointer is not a thumb, but the rail has the room, and at
+     this size the slots and the keypad hold the composition */
+  .slot { height: 66px; }
+  .key { padding: 14px 0; font-size: 19px; }
+  .pad { gap: 8px; margin-top: 10px; }
+  .slots { gap: 10px; }
+  .actions { gap: 8px; margin-top: 10px; }
+  .board-head { margin-bottom: 11px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

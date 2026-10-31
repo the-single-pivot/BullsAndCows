@@ -5,9 +5,13 @@ A four-digit code-breaking game for the browser. Ten guesses, a clock, and no he
 [![check](https://github.com/the-single-pivot/BullsAndCows/actions/workflows/ci.yml/badge.svg)](https://github.com/the-single-pivot/BullsAndCows/actions/workflows/ci.yml)
 
 <p align="center">
-  <img src="docs/board.png" width="330" alt="Seven scored guesses stacked above the keypad, the clock running on guess eight of ten">
+  <img src="docs/desktop.png" width="760" alt="The laptop layout: a framed card with the scored guesses on the left and the board on the right">
+</p>
+
+<p align="center">
+  <img src="docs/board.png" width="265" alt="On a phone: seven scored guesses stacked above the keypad, the clock running on guess eight of ten">
   &nbsp;
-  <img src="docs/solved.png" width="330" alt="The end screen: solved in five guesses, one under par, and how many codes were left after each guess">
+  <img src="docs/solved.png" width="265" alt="The end screen: solved in five guesses, one under par, and how many codes were left after each guess">
 </p>
 
 The computer picks a code of four different digits. You guess, and every guess comes
@@ -31,6 +35,11 @@ costs nothing. Tap it for the session record: codes played, how many you cracked
 streak, fewest guesses, quickest time, and every finished game with its guess count and
 time. That record lives in `sessionStorage`, so a refresh keeps it and closing the tab
 clears it.
+
+It is one screen either way, and the page never scrolls. On a phone the guesses stack
+above a keypad sitting under your thumbs. Past 900px the same screen splits in two,
+guesses on the left and the board on a rail to the right, inside a card that stops short
+of the edges.
 
 ## Running it
 
