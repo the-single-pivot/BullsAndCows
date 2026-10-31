@@ -12,7 +12,7 @@
   "scripts": {
     "start": "node tools/serve.mjs",
     "dev": "node tools/serve.mjs",
-    "test": "node --test \"test/*.test.js\"",
+    "test": "node --test",
     "build": "node tools/build.mjs",
     "check": "npm test && npm run build"
   },
