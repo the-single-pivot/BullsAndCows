@@ -174,7 +174,7 @@ button:disabled { cursor: not-allowed; }
   border-bottom: 1px solid var(--line);
   animation: slide .22s ease-out both;
 }
-@keyframes slide { from { opacity: 0; transform: translateY(-6px); } }
+@keyframes slide { from { opacity: 0; transform: translateY(6px); } }
 .guess:last-child { border-bottom: none; }
 
 .g-no { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }

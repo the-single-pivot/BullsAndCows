@@ -113,9 +113,9 @@ function submitGuess() {
   }
 
   render();
-  // The newest guess goes to the top of the feed, so bring the top back
-  // into view if the player had scrolled down through older ones.
-  els.feed.scrollTop = 0;
+  // The newest guess lands at the foot of the feed, so follow it down if
+  // the player had scrolled up through the older ones.
+  els.feed.scrollTop = els.feed.scrollHeight;
   announce(entry);
 }
 
@@ -197,9 +197,9 @@ function renderFeed() {
   els.primer.hidden = S.guesses.length > 0;
 
   els.history.replaceChildren();
-  // Newest first: the result you just got sits at the top of the screen,
-  // where you read it before choosing the next guess.
-  for (let i = S.guesses.length - 1; i >= 0; i--) {
+  // Oldest first, so the guesses read down the screen in the order they
+  // were made and the one you just played is the last line.
+  for (let i = 0; i < S.guesses.length; i++) {
     const g = S.guesses[i];
     const row = el('li', 'guess');
     if (g.bulls === LEN) row.dataset.win = '1';
