@@ -192,14 +192,30 @@ function renderTop() {
   els.topActs.append(help, fresh);
 }
 
+/**
+ * Rows already on screen are left alone. Rebuilding the list on every
+ * render restarted each row's entry animation, so the guesses you had
+ * already made flickered every time you pressed a digit.
+ */
+let rowsShown = 0;
+
 function renderFeed() {
   // The primer teaches the rules in the space the guesses will fill.
   els.primer.hidden = S.guesses.length > 0;
 
-  els.history.replaceChildren();
+  if (S.guesses.length < rowsShown) {     // a new game: start the list over
+    els.history.replaceChildren();
+    rowsShown = 0;
+  }
   // Oldest first, so the guesses read down the screen in the order they
   // were made and the one you just played is the last line.
-  for (let i = 0; i < S.guesses.length; i++) {
+  for (; rowsShown < S.guesses.length; rowsShown++) {
+    els.history.append(guessRow(rowsShown));
+  }
+}
+
+/** One scored guess. Built once, then never touched again. */
+function guessRow(i) {
     const g = S.guesses[i];
     const row = el('li', 'guess');
     if (g.bulls === LEN) row.dataset.win = '1';
@@ -219,8 +235,7 @@ function renderFeed() {
     row.append(el('span', 'g-text', tally(g.bulls, g.cows)));
     row.setAttribute('aria-label',
       'Guess ' + (i + 1) + ': ' + g.digits.join(' ') + '. ' + tally(g.bulls, g.cows) + '.');
-    els.history.append(row);
-  }
+    return row;
 }
 
 function renderBoard() {
@@ -235,30 +250,42 @@ function renderBoard() {
   // Once the game is decided the slots hold the code: the winning guess
   // when it was found, and the answer the player never reached when it wasn't.
   const shown = over() ? S.code : S.input;
-  els.slots.replaceChildren();
+  if (els.slots.children.length !== LEN) {
+    for (let i = 0; i < LEN; i++) els.slots.append(el('div', 'slot'));
+  }
+  // Updated in place: a fresh element would replay the fill animation and
+  // restart the caret blink on every keystroke.
   for (let i = 0; i < LEN; i++) {
-    const s = el('div', 'slot', shown[i] != null ? String(shown[i]) : '');
-    if (shown[i] != null) s.dataset.filled = '1';
-    else if (i === S.input.length && !over()) s.dataset.state = 'active';
-    if (S.lost) s.dataset.lost = '1';
-    s.setAttribute('aria-label',
-      'Slot ' + (i + 1) + ': ' + (shown[i] != null ? shown[i] : 'empty'));
-    els.slots.append(s);
+    const s = els.slots.children[i];
+    const d = shown[i];
+    s.textContent = d != null ? String(d) : '';
+    s.toggleAttribute('data-filled', d != null);
+    s.toggleAttribute('data-lost', !!S.lost);
+    if (d == null && i === S.input.length && !over()) s.dataset.state = 'active';
+    else s.removeAttribute('data-state');
+    s.setAttribute('aria-label', 'Slot ' + (i + 1) + ': ' + (d != null ? d : 'empty'));
   }
 
   els.msg.textContent = S.msg;
   els.msg.dataset.tone = S.tone;
 
   els.play.hidden = over();
-  els.pad.replaceChildren();
-  for (const d of DIGITS) {
+  if (els.pad.children.length !== DIGITS.length) {
+    for (const d of DIGITS) {
+      const k = el('button', 'key', String(d));
+      k.type = 'button';
+      k.dataset.k = String(d);
+      els.pad.append(k);
+    }
+  }
+  // only the disabled state changes, and the key you are pressing has to
+  // survive the press: a replaced button drops its own active state
+  for (const k of els.pad.children) {
+    const d = Number(k.dataset.k);
     const used = S.input.indexOf(d) !== -1;
-    const k = el('button', 'key', String(d));
-    k.type = 'button';
-    k.dataset.k = String(d);
     k.disabled = used || S.input.length === LEN;
     if (used) k.setAttribute('aria-label', d + ', already in this guess');
-    els.pad.append(k);
+    else k.removeAttribute('aria-label');
   }
   els.del.disabled = !S.input.length;
   els.submit.disabled = S.input.length !== LEN;
@@ -279,7 +306,14 @@ function tick() {
   els.clock.toggleAttribute('data-running', !!S.started && !S.ended);
 }
 
+/** Rebuilt only when the result itself changes, so the rise animation
+ *  plays once and the share button keeps its "Copied" label. */
+let endShown = '';
+
 function renderEnd() {
+  const state = over() ? (S.solved ? 'won' : 'lost') + S.guesses.length + '@' + S.ended : '';
+  if (state === endShown) return;
+  endShown = state;
   els.won.replaceChildren();
   if (!over()) return;
   const box = el('div', 'won');
